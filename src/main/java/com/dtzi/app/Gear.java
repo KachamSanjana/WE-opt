@@ -13,7 +13,7 @@ public class Gear {
   Gloves gloves;
   Pants pants;
   Boots boots;
-  Map<String, Number> stats = new HashMap<>() {
+  Map<String, Float> stats = new HashMap<>() {
     {
       put("attackDamage", 0f);
       put("criticalRate", 0f);
@@ -21,6 +21,9 @@ public class Gear {
       put("armor", 0f);
       put("precision", 0f);
       put("dodge", 0f);
+      put("health", 0f);
+      put("lootChance", 0f);
+      put("hunger", 0f);
     }
   };
   float totalCost = 0;
@@ -96,7 +99,7 @@ public class Gear {
     this.weapon = newWeapon;
   }
 
-  public Map<String, Number> getStats() {
+  public Map<String, Float> getStats() {
     return stats;
   }
 }

@@ -1,9 +1,9 @@
 package com.dtzi.app.Equipment;
 
 public class Weapon {
-  private int attackDamage;
+  private float attackDamage;
   private float criticalRate;
-  public Weapon(int attackDamage, float criticalRate, float price) {
+  public Weapon(float attackDamage, float criticalRate, float price) {
     this.attackDamage = attackDamage;
     this.criticalRate = criticalRate;
   }

@@ -1,4 +1,9 @@
 /home/dtzi/WE-opt/src/main/java/com/dtzi/app/App.java
+/home/dtzi/WE-opt/src/main/java/com/dtzi/app/Buffs/Buffs.java
+/home/dtzi/WE-opt/src/main/java/com/dtzi/app/Buffs/CountryBonuses.java
+/home/dtzi/WE-opt/src/main/java/com/dtzi/app/Buffs/LocaleBonuses.java
+/home/dtzi/WE-opt/src/main/java/com/dtzi/app/Buffs/MilitaryUnitBonuses.java
+/home/dtzi/WE-opt/src/main/java/com/dtzi/app/Buffs/PoliticalBonuses.java
 /home/dtzi/WE-opt/src/main/java/com/dtzi/app/Equipment/AbstractBodyArmor.java
 /home/dtzi/WE-opt/src/main/java/com/dtzi/app/Equipment/Boots.java
 /home/dtzi/WE-opt/src/main/java/com/dtzi/app/Equipment/Chest.java
@@ -9,3 +14,4 @@
 /home/dtzi/WE-opt/src/main/java/com/dtzi/app/Gear.java
 /home/dtzi/WE-opt/src/main/java/com/dtzi/app/Player.java
 /home/dtzi/WE-opt/src/main/java/com/dtzi/app/Skills.java
+/home/dtzi/WE-opt/src/main/java/com/dtzi/app/StatsMaps.java

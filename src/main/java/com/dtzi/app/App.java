@@ -14,7 +14,7 @@ public class App {
       gear.setGloves(new Gloves(0, 5f));
       gear.setPants(new Pants(0, 5f));
       gear.setBoots(new Boots(0, 5f));
-      Skills skills = new Skills(50, gear);
-      System.out.println(skills.calcDamage(0));
+      Player player = new Player(gear, 50, 0);
+      System.out.println(player.optimizeSkillPoints());
     }
 }
