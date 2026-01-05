@@ -1,5 +1,6 @@
 package com.dtzi.app;
 
+import java.rmi.NotBoundException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,95 +13,90 @@ public class Gear {
   Gloves gloves;
   Pants pants;
   Boots boots;
-  Map<String, Integer> stats = new HashMap<>() {{
-    put("attackDamage", 0);
-    put("criticalRate", 0);
-    put("criticalDamage", 0);
-    put("armor", 0);
-    put("precision", 0);
-    put("dodge", 0);
-  }};
-  float totalCost; // to represent the price in the future
+  Map<String, Number> stats = new HashMap<>() {
+    {
+      put("attackDamage", 0f);
+      put("criticalRate", 0f);
+      put("criticalDamage", 0f);
+      put("armor", 0f);
+      put("precision", 0f);
+      put("dodge", 0f);
+    }
+  };
+  float totalCost = 0;
 
   public Gear() {
   }
 
-  void swap(Weapon oldWeapon, Weapon newWeapon) {
+  void swap(Weapon newWeapon) {
+    stats.put("attackDamage", newWeapon.getAttackDamage());
+    stats.put("criticalRate", newWeapon.getCriticalRate());
+  }
+
+  void swap(Helmet newHelmet) {
+    String statType = newHelmet.getSTAT_TYPE();
+    stats.put(statType, newHelmet.getStat());
+  }
+
+  void swap(Chest newChest) {
+    String statType = newChest.getSTAT_TYPE();
     try {
-      stats.put("attackDamage", this.stats.get("attackDamage") - oldWeapon.getAttackDamage() + newWeapon.getAttackDamage());
-      stats.put("criticalRate", this.stats.get("criticalRate") - oldWeapon.getCriticalRate() + newWeapon.getCriticalRate());
+      stats.put(statType, this.stats.get(statType).floatValue() - this.chest.getStat() + newChest.getStat());
     } catch (NullPointerException e) {
-      stats.put("attackDamage", this.stats.get("attackDamage") + newWeapon.getAttackDamage());
-      stats.put("criticalRate", this.stats.get("criticalRate") + newWeapon.getCriticalRate());
+      stats.put(statType, this.stats.get(statType).floatValue() + newChest.getStat());
     }
   }
 
-  void swap(Helmet oldHelmet, Helmet newHelmet) {
-    String statType = newHelmet.getStatType();
-    try {
-      stats.put(statType, this.stats.get(statType) - oldHelmet.getStat() + newHelmet.getStat());
-    } catch (NullPointerException e) {
-      stats.put(statType, this.stats.get(statType) + newHelmet.getStat());
-    }
+  void swap(Gloves newGloves) {
+    String statType = newGloves.getSTAT_TYPE();
+    stats.put(statType, newGloves.getStat());
   }
-  void swap(Chest oldChest, Chest newChest) {
-    String statType = newChest.getStatType();
+
+  void swap(Pants newPants) {
+    String statType = newPants.getSTAT_TYPE();
     try {
-      stats.put(statType, this.stats.get(statType) - oldChest.getStat() + newChest.getStat());
+      stats.put(statType, this.stats.get(statType).floatValue() - this.pants.getStat() + newPants.getStat());
     } catch (NullPointerException e) {
-      stats.put(statType, this.stats.get(statType) + newChest.getStat());
-    }
-  }
-  void swap(Gloves oldGloves, Gloves newGloves) {
-    String statType = newGloves.getStatType();
-    try {
-      stats.put(statType, this.stats.get(statType) - oldGloves.getStat() + newGloves.getStat());
-    } catch (NullPointerException e) {
-      stats.put(statType, this.stats.get(statType) + newGloves.getStat());
-    }
-  }
-  void swap(Pants oldPants, Pants newPants) {
-    String statType = newPants.getStatType();
-    try {
-      stats.put(statType, this.stats.get(statType) - oldPants.getStat() + newPants.getStat());
-    } catch (NullPointerException e) {
-      stats.put(statType, this.stats.get(statType) + newPants.getStat());
+      stats.put(statType, this.stats.get(statType).floatValue() + newPants.getStat());
     }
   }
 
-  void swap(Boots oldBoots, Boots newBoots) {
-    String statType = newBoots.getStatType();
-    try {
-      stats.put(statType, this.stats.get(statType) - oldBoots.getStat() + newBoots.getStat());
-    } catch (NullPointerException e) {
-      stats.put(statType, this.stats.get(statType) + newBoots.getStat());
-    }
+  void swap(Boots newBoots) {
+    String statType = newBoots.getSTAT_TYPE();
+    stats.put(statType, newBoots.getStat());
   }
+
   public void setHelmet(Helmet newHelmet) {
-      this.swap(this.helmet, newHelmet);
-      this.helmet = newHelmet;
+    this.swap(newHelmet);
+    this.helmet = newHelmet;
   }
+
   public void setChest(Chest newChest) {
-    this.swap(this.chest, newChest);
+    this.swap(newChest);
     this.chest = newChest;
   }
+
   public void setGloves(Gloves newGloves) {
-    this.swap(this.gloves, newGloves);
+    this.swap(newGloves);
     this.gloves = newGloves;
   }
+
   public void setPants(Pants newPants) {
-    this.swap(this.pants, newPants);
+    this.swap(newPants);
     this.pants = newPants;
   }
+
   public void setBoots(Boots newBoots) {
-    this.swap(this.boots, newBoots);
+    this.swap(newBoots);
     this.boots = newBoots;
   }
+
   public void setWeapon(Weapon newWeapon) {
-    this.swap(this.weapon, newWeapon);
+    this.swap(newWeapon);
     this.weapon = newWeapon;
   }
-  public Map<String, Integer> getStats() {
+
+  public Map<String, Number> getStats() {
     return stats;
-    }
+  }
 }

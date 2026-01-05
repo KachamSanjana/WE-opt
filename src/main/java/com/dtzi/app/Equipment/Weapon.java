@@ -1,16 +1,20 @@
 package com.dtzi.app.Equipment;
 
-public class Weapon implements Equipment {
+public class Weapon {
   private int attackDamage;
-  private int criticalRate;
-  public Weapon(int attackDamage, int criticalRate) {
+  private float criticalRate;
+  public Weapon(int attackDamage, float criticalRate, float price) {
     this.attackDamage = attackDamage;
     this.criticalRate = criticalRate;
   }
-  public int getAttackDamage() {
+  public float getAttackDamage() {
     return this.attackDamage;
   }
-  public int getCriticalRate() {
+  public float getCriticalRate() {
     return this.criticalRate;
+  }
+  private float price;
+  public float getPrice() {
+    return this.price;
   }
 }

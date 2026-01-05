@@ -1,11 +1,10 @@
 package com.dtzi.app.Equipment;
 
-import java.rmi.NotBoundException;
-
 public abstract class AbstractBodyArmor {
-  int stat;
+  float stat;
   String statType;
-  public int getStat() {
+  float price;
+  public float getStat() {
     return stat;
   }
   public String getStatType() {
