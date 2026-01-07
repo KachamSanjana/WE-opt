@@ -15,8 +15,8 @@ public class App {
     public static void main(String[] args) {
       Instant start = Instant.now();
       Gear gear = new Gear();
-      // Ammo ammo = new Ammo(0.1f, 0.15f);
-      Ammo ammo = new Ammo(0, 0);
+      Ammo ammo = new Ammo(0.1f, 0.15f);
+      // Ammo ammo = new Ammo(0, 0);
       gear.setWeapon(new Weapon(87, 0.15f, ammo, 25.4f));
       gear.setHelmet(new Helmet(19, 7.1f));
       gear.setChest(new Chest(10, 7.1f));
@@ -46,6 +46,7 @@ public class App {
       // Skills skills = new Skills(0);
       Player player = new Player(gear, skills, buffs, food);
       System.out.println(player.optimizeLootChance());
+      System.out.println("Damage per 8 hours: " + player.getDamageEfficiency()[0]);
       Instant end = Instant.now();
       System.out.println(Duration.between(start, end).toMillis());
     }

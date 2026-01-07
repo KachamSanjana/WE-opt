@@ -1,6 +1,7 @@
 package com.dtzi.app;
 
 import java.util.Map;
+import java.io.PrintStream;
 import java.rmi.NotBoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -82,11 +83,12 @@ public class Player {
     float costPerHit = costOfArmor + costOfShooting + costOfFood + this.buffs.pill().price() / hitsOver8h;
 
     float lootChance = fullMap.get("lootChance");
-    float totalCases = lootChance * hitsOver8h + this.casesOverDebuff(fullMap);
+    float totalCases = lootChance * hitsOver8h; // + this.casesOverDebuff(fullMap);
 
     float hitsPer1k = 1000 / hitDamage;
     float caseReturnPer1k = totalCases / hitsOver8h * hitsPer1k * CASE_PRICE;
     float costPer1k = costPerHit * hitsPer1k - caseReturnPer1k;
+    // System.out.println(fullMap.get("attackDamage") * this.buffs.getMultiplier() * this.gear.getWeapon().getAmmo().getPrice());
     // System.out.println(fullMap);
     // System.out.println(hitsOver8h);
     // System.out.println(hitDamage);
