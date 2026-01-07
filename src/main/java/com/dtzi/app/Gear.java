@@ -23,6 +23,10 @@ public class Gear {
       put("health", 0f);
       put("lootChance", 0f);
       put("hunger", 0f);
+      put("entre", 0f);
+      put("energy", 0f);
+      put("production", 0f);
+      put("companies", 0f);
     }
   };
   float armorCost = 0f;

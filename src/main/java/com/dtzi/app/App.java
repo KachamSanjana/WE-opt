@@ -29,7 +29,7 @@ public class App {
       RegionalBonuses regBonus = new RegionalBonuses(0f, false);
       Pill pill = new Pill(true);
       Buffs buffs = new Buffs(pill, 0.12f, countryBonus, muBonus, regBonus, polBonus);
-      Skills skills = new Skills(65);
+      Skills skills = new Skills(90);
       Food food = new Food(3, 6);
       // gear.setWeapon(new Weapon(0, 0, ammo, 0));
       // gear.setHelmet(new Helmet(0, 0));

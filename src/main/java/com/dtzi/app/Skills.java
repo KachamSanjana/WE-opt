@@ -15,6 +15,10 @@ public class Skills {
       put("health", 0f);
       put("lootChance", 0f);
       put("hunger", 0f);
+      put("entre", 0f);
+      put("energy", 0f);
+      put("production", 0f);
+      put("companies", 0f);
     }
   };
   private final Map<String, Float> statIncrements = new HashMap<String, Float>() {
@@ -28,6 +32,10 @@ public class Skills {
       put("health", 1f);
       put("lootChance", 0.01f);
       put("hunger", 1f);
+      put("entre", 0.5f);
+      put("energy", 1f);
+      put("production", 3f);
+      put("companies", 1f);
     }
   };
   private Map<String, Integer> upgradeCost = new HashMap<>() {
@@ -41,6 +49,10 @@ public class Skills {
       put("health", 1);
       put("lootChance", 1);
       put("hunger", 1);
+      put("entre", 1);
+      put("energy", 1);
+      put("production", 1);
+      put("companies", 1);
     }
   };
   private int skillPoints;
@@ -53,7 +65,7 @@ public class Skills {
 
   public void increaseLevel(String statType) {
     switch (statType) {
-      case "attackDamage", "health", "hunger", "criticalDamage":
+      case "attackDamage", "health", "hunger", "criticalDamage", "companies", "production", "energy", "entre":
         this.stats.put(statType,
             this.stats.get(statType) + this.statIncrements.get(statType));
         break;
@@ -71,7 +83,7 @@ public class Skills {
 
   public void decreaseLevel(String statType) {
     switch (statType) {
-      case "attackDamage", "health", "hunger", "criticalDamage":
+      case "attackDamage", "health", "hunger", "criticalDamage", "companies", "production", "energy", "entre":
         this.stats.put(statType,
             this.stats.get(statType) - this.statIncrements.get(statType));
         break;
@@ -128,21 +140,29 @@ public class Skills {
         put("health", 0f);
         put("lootChance", 0f);
         put("hunger", 0f);
+        put("entre", 0f);
+        put("energy", 0f);
+        put("production", 0f);
+        put("companies", 0f);
       }
     };
-  this.upgradeCost = new HashMap<>() {
-    {
-      put("attackDamage", 1);
-      put("criticalRate", 1);
-      put("criticalDamage", 1);
-      put("armor", 1);
-      put("precision", 1);
-      put("dodge", 1);
-      put("health", 1);
-      put("lootChance", 1);
-      put("hunger", 1);
-    }
-  };
-  this.skillPoints = originalSkillPoints;
+    this.upgradeCost = new HashMap<>() {
+      {
+        put("attackDamage", 1);
+        put("criticalRate", 1);
+        put("criticalDamage", 1);
+        put("armor", 1);
+        put("precision", 1);
+        put("dodge", 1);
+        put("health", 1);
+        put("lootChance", 1);
+        put("hunger", 1);
+        put("entre", 1);
+        put("energy", 1);
+        put("production", 1);
+        put("companies", 1);
+      }
+    };
+    this.skillPoints = originalSkillPoints;
   }
 }

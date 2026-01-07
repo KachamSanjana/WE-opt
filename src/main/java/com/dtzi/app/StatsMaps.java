@@ -9,7 +9,7 @@ public class StatsMaps {
     Map<String, Float> sumMap = new HashMap<>();
     for (String elem : map1.keySet()) {
       switch (elem) {
-        case "attackDamage", "health", "hunger", "criticalDamage":
+        case "attackDamage", "health", "hunger", "criticalDamage", "production", "companies", "entre", "energy":
           sumMap.put(elem, map1.get(elem) + map2.get(elem));
           break;
         case "armor":
