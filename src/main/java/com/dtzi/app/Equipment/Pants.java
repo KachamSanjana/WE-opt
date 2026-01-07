@@ -10,7 +10,7 @@ public class Pants extends AbstractBodyArmor {
   public float getStat() {
     return this.stat;
   }
-  public String getSTAT_TYPE() {
+  public String getStatType() {
     return this.STAT_TYPE;
   }
   private float price;

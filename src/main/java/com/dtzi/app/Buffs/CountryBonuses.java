@@ -1,3 +1,7 @@
 package com.dtzi.app.Buffs;
 
-public record CountryBonuses (float countryBunker, float countryOrder) {}
+public record CountryBonuses(float countryBunker, float countryOrder) {
+  public float bonus() {
+    return countryBunker + countryOrder;
+  }
+}

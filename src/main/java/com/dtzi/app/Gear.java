@@ -1,18 +1,17 @@
 package com.dtzi.app;
 
-import java.rmi.NotBoundException;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.dtzi.app.Equipment.*;
 
 public class Gear {
-  Weapon weapon;
-  Helmet helmet;
-  Chest chest;
-  Gloves gloves;
-  Pants pants;
-  Boots boots;
+  private Weapon weapon;
+  private Helmet helmet;
+  private Chest chest;
+  private Gloves gloves;
+  private Pants pants;
+  private Boots boots;
   Map<String, Float> stats = new HashMap<>() {
     {
       put("attackDamage", 0f);
@@ -26,7 +25,7 @@ public class Gear {
       put("hunger", 0f);
     }
   };
-  float totalCost = 0;
+  float armorCost = 0f;
 
   public Gear() {
   }
@@ -37,35 +36,54 @@ public class Gear {
   }
 
   void swap(Helmet newHelmet) {
-    String statType = newHelmet.getSTAT_TYPE();
+    try {
+    this.armorCost = this.armorCost - this.helmet.getPrice() + newHelmet.getPrice();
+    } catch (NullPointerException e) {
+      this.armorCost = this.armorCost + newHelmet.getPrice();
+    }
+    String statType = newHelmet.getStatType();
     stats.put(statType, newHelmet.getStat());
   }
 
   void swap(Chest newChest) {
-    String statType = newChest.getSTAT_TYPE();
+    String statType = newChest.getStatType();
     try {
+      this.armorCost = this.armorCost - this.chest.getPrice() + newChest.getPrice();
       stats.put(statType, this.stats.get(statType).floatValue() - this.chest.getStat() + newChest.getStat());
     } catch (NullPointerException e) {
+      this.armorCost = this.armorCost + newChest.getPrice();
       stats.put(statType, this.stats.get(statType).floatValue() + newChest.getStat());
     }
   }
 
   void swap(Gloves newGloves) {
-    String statType = newGloves.getSTAT_TYPE();
+    String statType = newGloves.getStatType();
+    try {
+      this.armorCost = this.armorCost - this.gloves.getPrice() + newGloves.getPrice();
+    } catch (NullPointerException e) {
+      this.armorCost = this.armorCost + newGloves.getPrice();
+    }
     stats.put(statType, newGloves.getStat());
   }
 
   void swap(Pants newPants) {
-    String statType = newPants.getSTAT_TYPE();
+    String statType = newPants.getStatType();
     try {
+      this.armorCost = this.armorCost - this.pants.getPrice() + newPants.getPrice();
       stats.put(statType, this.stats.get(statType).floatValue() - this.pants.getStat() + newPants.getStat());
     } catch (NullPointerException e) {
+      this.armorCost = this.armorCost + newPants.getPrice();
       stats.put(statType, this.stats.get(statType).floatValue() + newPants.getStat());
     }
   }
 
   void swap(Boots newBoots) {
-    String statType = newBoots.getSTAT_TYPE();
+    try {
+    this.armorCost = this.armorCost - this.boots.getPrice() + newBoots.getPrice();
+    } catch (NullPointerException e) {
+      this.armorCost = this.armorCost + newBoots.getPrice();
+    }
+    String statType = newBoots.getStatType();
     stats.put(statType, newBoots.getStat());
   }
 
@@ -99,7 +117,30 @@ public class Gear {
     this.weapon = newWeapon;
   }
 
+  public Weapon getWeapon() {
+    return this.weapon;
+  }
+  public Helmet getHelmet() {
+    return this.helmet;
+  }
+  public Chest getChest() {
+    return this.chest;
+  }
+  public Gloves getGloves() {
+    return this.gloves;
+  }
+  public Pants getPants() {
+    return this.pants;
+  }
+  public Boots getBoots() {
+    return this.boots;
+  }
+
   public Map<String, Float> getStats() {
-    return stats;
+    return this.stats;
+  }
+
+  public float getArmorCost() {
+    return this.armorCost;
   }
 }

@@ -6,14 +6,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-
+import com.dtzi.app.Buffs.Buffs;
+import com.dtzi.app.Buffs.CountryBonuses;
+import com.dtzi.app.Buffs.MilitaryUnitBonuses;
+import com.dtzi.app.Buffs.PoliticalBonuses;
+import com.dtzi.app.Buffs.RegionalBonuses;
 import com.dtzi.app.StatsMaps;
 
 public class Player {
   private Gear gear;
   private Skills skills;
-  private int foodQuality;
+  private Food food;
   private Map<String, Float> totalStats;
+  private Buffs buffs;
   static Map<String, Float> BASE_STATS = new HashMap<>() {
     {
       put("attackDamage", 100f);
@@ -24,15 +29,16 @@ public class Player {
       put("dodge", 0f);
       put("health", 5f);
       put("lootChance", 0.05f);
-      put("hunger", 5f);
+      put("hunger", 4f);
     }
   };
 
-  Player(Gear gear, int sp, int food) {
+  Player(Gear gear, Skills skills, Buffs buffs, Food food) {
     this.gear = gear;
-    this.foodQuality = food / 10;
+    this.food = food;
     this.totalStats = StatsMaps.addMaps(gear.getStats(), BASE_STATS);
-    this.skills = new Skills(sp);
+    this.skills = skills;
+    this.buffs = buffs;
   }
 
   void setGear(Gear gear) {
@@ -52,76 +58,117 @@ public class Player {
   }
 
   private Map<String, Float> sumStats(Map<String, Float> base, Map<String, Float> gear, Map<String, Float> skills) {
-    Map<String,Float> fullMap = StatsMaps.addMaps(base, gear);
+    Map<String, Float> fullMap = StatsMaps.addMaps(base, gear);
     fullMap = StatsMaps.addMaps(fullMap, skills);
     return fullMap;
 
   }
 
-  public float calcDamage() {
-    Map<String,Float> fullMap = sumStats(BASE_STATS, this.gear.getStats(), this.skills.getStats());
-    float DMG_OVER_8H;
-    int ATT = fullMap.get("attackDamage").intValue();
-    float CD = fullMap.get("criticalDamage").floatValue();
-    float CR = fullMap.get("criticalRate").floatValue();
-    float PREC = fullMap.get("precision").floatValue();
-    float ARMOR = fullMap.get("armor").floatValue();
-    float DODGE = fullMap.get("dodge").floatValue();
-    int HP = fullMap.get("health").intValue();
-    int HUNGER = fullMap.get("hunger").intValue();
-    float HP_REGEN = (float) HP / 10; // Integer division ...
-    float HUNGER_REGEN = (float) HUNGER / 10;
-    float MISSED_HIT = ATT / 2;
-    float SUCCESSFUL_HIT = ATT * ((1 - CR) + CR * (1 + CD));
-    float DMG_PER_HIT = MISSED_HIT * (1 - PREC) + SUCCESSFUL_HIT * PREC;
-    float TOTAL_HP_OVER_8H = (HP + HP_REGEN * 8 + this.foodQuality * HUNGER_REGEN * 8 + this.foodQuality * HUNGER)
-        / (1 - DODGE)
-        / (1 - ARMOR);
-    int HITS_OVER_8H = (int) Math.floor(TOTAL_HP_OVER_8H);
-    DMG_OVER_8H = DMG_PER_HIT * HITS_OVER_8H;
-    return DMG_OVER_8H;
+  public Number[] getDamageEfficiency() {
+    Map<String, Float> fullMap = sumStats(BASE_STATS, this.gear.getStats(), this.skills.getStats());
+    float dodge = fullMap.get("dodge").floatValue();
+    float armor = fullMap.get("armor").floatValue();
+
+    Number[] returnValue = new Number[2];
+    int hitsOver8h = this.hitsOver8h(fullMap);
+    float hitDamage = this.hitDamage(fullMap) * this.buffs.getMultiplier() * this.gear.getWeapon().getAmmo().getBonus();
+
+    float dmgOver8h = hitDamage * hitsOver8h;
+    float costOfArmor = this.gear.getArmorCost() * (1 - dodge) / 100;
+    float costOfShooting = this.gear.getWeapon().getPrice() / 100 + this.gear.getWeapon().getAmmo().getPrice();
+    float hunger = fullMap.get("hunger").floatValue();
+    float hungerRegen = (float) hunger / 10;
+    float costOfFood = (hungerRegen*8 + hunger) / hitsOver8h;
+    float costPerHit = costOfArmor + costOfShooting + costOfFood + this.buffs.pill().price() / hitsOver8h;
+    float hitsPer1k = 1000 / hitDamage;
+    float costPer1k = costPerHit * hitsPer1k;
+    System.out.println(fullMap);
+    System.out.println(hitsOver8h);
+    System.out.println(hitDamage);
+    System.out.println(costPer1k);
+    System.out.println(dmgOver8h);
+
+    returnValue[0] = dmgOver8h;
+    returnValue[1] = costPer1k;
+    return returnValue;
   }
-  
+
+  public int hitsOver8h(Map<String, Float> statsMap) {
+    int hits;
+    float hp = statsMap.get("health").floatValue();
+    float hunger = statsMap.get("hunger").floatValue();
+    float dodge = statsMap.get("dodge").floatValue();
+    float armor = statsMap.get("armor").floatValue();
+    float hpRegen = (float) hp / 10;
+    float hungerRegen = (float) hunger / 10;
+    float hpOver8h = (hp + hpRegen * 8 + this.food.getHpRestore() * hungerRegen * 8 + this.food.getHpRestore() * hunger)
+        / (1 - dodge)
+        / (1 - armor);
+    hits = (int) Math.floor(hpOver8h);
+    return hits;
+  }
+
+  public float hitDamage(Map<String, Float> statsMap) {
+    float att = statsMap.get("attackDamage").floatValue();
+    float cd = statsMap.get("criticalDamage").floatValue();
+    float cr = statsMap.get("criticalRate").floatValue();
+    float prec = statsMap.get("precision").floatValue();
+    float missedHitDmg = att / 2;
+    float successfulHitDmg = att * ((1 - cr) + cr * (1 + cd));
+    float hitDmg = missedHitDmg * (1 - prec) + successfulHitDmg * prec;
+    return hitDmg;
+  }
 
   private List<Number> testUpgrades(Skills skills, String statType) {
-    int largestDamageUpgradeCount = 0;
-    float largestDamageIncreasePerSkillPoint = Float.NEGATIVE_INFINITY;
+    int bestUpgradeCount = 0;
+    float bestDamageEff = Float.NEGATIVE_INFINITY;
     int skillPoints = skills.getSkillPoints();
-    float base_dmg = this.calcDamage();
-    for (int upgradeCount = 1; upgradeCount < 11; upgradeCount++) {
-
+    Number[] baseDmgEff = this.getDamageEfficiency();
+    float baseDmg = baseDmgEff[0].floatValue();
+    float baseCostPer1k = baseDmgEff[1].floatValue();
+    for (int upgradeCount = 0; upgradeCount < 10; upgradeCount++) {
       this.skills.increaseLevel(statType, upgradeCount);
       int skillPointsLeft = this.skills.getSkillPoints();
-
-      if (skillPointsLeft < 0) {
+      if (skillPointsLeft < 0 || this.skills.getUpgradeCost().get(statType) == 10) {
         this.skills.decreaseLevel(statType, upgradeCount);
-        return Arrays.asList(largestDamageIncreasePerSkillPoint, largestDamageUpgradeCount);
+        return Arrays.asList(bestDamageEff, bestUpgradeCount);
       }
 
       int skillPointsDiff = skillPoints - skillPointsLeft;
-      float damageDiff = this.calcDamage() - base_dmg;
-      float damageIncreasePerSkillPoint = damageDiff / skillPointsDiff;
-      if (damageIncreasePerSkillPoint > largestDamageIncreasePerSkillPoint) {
-        largestDamageIncreasePerSkillPoint = damageIncreasePerSkillPoint;
-        largestDamageUpgradeCount = upgradeCount;
+      Number[] newDmgEff = this.getDamageEfficiency();
+      float newDmg = newDmgEff[0].floatValue();
+      float newCostPer1k = newDmgEff[1].floatValue();
+      float relativeDamageIncrease = (1 - newDmg / baseDmg) / skillPointsDiff;
+      float relativeCostDecrease = (1 - baseCostPer1k / newCostPer1k) / skillPointsDiff;
+      float efficiency = relativeCostDecrease * relativeDamageIncrease;
+      if (efficiency > bestDamageEff) {
+        bestDamageEff = efficiency;
+        bestUpgradeCount = upgradeCount;
       }
 
       this.skills.decreaseLevel(statType, upgradeCount);
     }
-    return Arrays.asList(largestDamageIncreasePerSkillPoint, largestDamageUpgradeCount);
+    return Arrays.asList(bestDamageEff, bestUpgradeCount);
   }
 
   private float testUpgrade(Skills skills, String statType) {
-    float base_dmg = this.calcDamage();
+    float efficiency;
+    Number[] baseDmgEff = this.getDamageEfficiency();
+    float baseDmg = baseDmgEff[0].floatValue();
+    float baseCostPer1k = baseDmgEff[1].floatValue();
     int requiredSkillPoints = this.skills.getUpgradeCost().get(statType);
+    if (requiredSkillPoints > this.skills.getSkillPoints() || this.skills.getUpgradeCost().get(statType) == 10) {
+      return 0;
+    }
     this.skills.increaseLevel(statType);
-    float dmg_over_8h = this.calcDamage();
-    float damageIncreasePerSkillPoint = (dmg_over_8h - base_dmg) / requiredSkillPoints;
+    Number[] newDmgEff = this.getDamageEfficiency();
+    float newDmg = newDmgEff[0].floatValue();
+    float newCostPer1k = newDmgEff[1].floatValue();
+    float relativeDamageIncrease = (1 - newDmg / baseDmg) / requiredSkillPoints;
+    float relativeCostDecrease = (1 - baseCostPer1k / newCostPer1k) / requiredSkillPoints;
+    efficiency = relativeCostDecrease * relativeDamageIncrease;
     this.skills.decreaseLevel(statType);
-      if (statType == "hunger") {
-        System.out.println(damageIncreasePerSkillPoint);
-      }
-    return damageIncreasePerSkillPoint;
+    return efficiency;
   }
 
   public Map<String, Integer> optimizeSkillPoints() {
@@ -129,7 +176,7 @@ public class Player {
     // Termination condition
     int skillPoints = this.skills.getSkillPoints();
     if (StatsMaps.allLargerThan(this.skills.getUpgradeCost(), skillPoints)) {
-      Map<String, Integer> upgradeCost = StatsMaps.subtractAll(this.skills.getUpgradeCost(), 1); // represents the actual upgrades costs.
+      Map<String, Integer> upgradeCost = StatsMaps.subtractAll(this.skills.getUpgradeCost(), 1);
       return upgradeCost;
     }
 
@@ -151,7 +198,7 @@ public class Player {
           }
           break;
         default:
-          damageRatio = this.testUpgrade(skills, statType);
+          damageRatio = this.testUpgrade(this.skills, statType);
           if (damageRatio > largestDamageIncreasePerSkillPoint) {
             largestDamageIncreasePerSkillPoint = damageRatio;
             largestDamageStat = statType;
