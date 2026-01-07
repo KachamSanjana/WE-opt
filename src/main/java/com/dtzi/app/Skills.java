@@ -17,7 +17,7 @@ public class Skills {
       put("hunger", 0f);
     }
   };
-  private final Map<String,Float> statIncrements = new HashMap<String, Float>() {
+  private final Map<String, Float> statIncrements = new HashMap<String, Float>() {
     {
       put("attackDamage", 20f);
       put("criticalRate", 0.05f);
@@ -44,9 +44,11 @@ public class Skills {
     }
   };
   private int skillPoints;
+  private int originalSkillPoints;
 
   public Skills(int sp) {
     this.skillPoints = sp;
+    this.originalSkillPoints = sp;
   }
 
   public void increaseLevel(String statType) {
@@ -79,7 +81,8 @@ public class Skills {
         break;
       default:
         this.stats.put(statType,
-            (float) Math.min(1, this.stats.get(statType).floatValue() - this.statIncrements.get(statType).floatValue()));
+            (float) Math.min(1,
+                this.stats.get(statType).floatValue() - this.statIncrements.get(statType).floatValue()));
     }
     this.skillPoints = this.skillPoints + this.upgradeCost.get(statType) - 1;
     this.upgradeCost.put(statType, this.upgradeCost.get(statType) - 1);
@@ -111,5 +114,35 @@ public class Skills {
 
   int getSkillPoints() {
     return this.skillPoints;
+  }
+
+  public void resetSkillPoints() {
+    this.stats = new HashMap<String, Float>() {
+      {
+        put("attackDamage", 0f);
+        put("criticalRate", 0f);
+        put("criticalDamage", 0f);
+        put("armor", 0f);
+        put("precision", 0f);
+        put("dodge", 0f);
+        put("health", 0f);
+        put("lootChance", 0f);
+        put("hunger", 0f);
+      }
+    };
+  this.upgradeCost = new HashMap<>() {
+    {
+      put("attackDamage", 1);
+      put("criticalRate", 1);
+      put("criticalDamage", 1);
+      put("armor", 1);
+      put("precision", 1);
+      put("dodge", 1);
+      put("health", 1);
+      put("lootChance", 1);
+      put("hunger", 1);
+    }
+  };
+  this.skillPoints = originalSkillPoints;
   }
 }

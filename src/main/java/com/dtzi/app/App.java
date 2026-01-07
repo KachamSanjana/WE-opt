@@ -3,6 +3,8 @@ package com.dtzi.app;
 import com.dtzi.app.Equipment.*;
 
 import java.util.Map;
+import java.time.Duration;
+import java.time.Instant;
 
 import com.dtzi.app.Buffs.*;
 
@@ -11,6 +13,7 @@ import com.dtzi.app.Buffs.*;
  */
 public class App {
     public static void main(String[] args) {
+      Instant start = Instant.now();
       Gear gear = new Gear();
       // Ammo ammo = new Ammo(0.1f, 0.15f);
       Ammo ammo = new Ammo(0, 0);
@@ -26,7 +29,7 @@ public class App {
       RegionalBonuses regBonus = new RegionalBonuses(0f, false);
       Pill pill = new Pill(true);
       Buffs buffs = new Buffs(pill, 0.12f, countryBonus, muBonus, regBonus, polBonus);
-      Skills skills = new Skills(59);
+      Skills skills = new Skills(65);
       Food food = new Food(3, 6);
       // gear.setWeapon(new Weapon(0, 0, ammo, 0));
       // gear.setHelmet(new Helmet(0, 0));
@@ -42,9 +45,8 @@ public class App {
       // Buffs buffs = new Buffs(pill, 0, countryBonus, muBonus, regBonus, polBonus);
       // Skills skills = new Skills(0);
       Player player = new Player(gear, skills, buffs, food);
-      System.out.println(player.optimizeSkillPoints());
-      Map<String, Integer> skillDistribution = player.getSkillPoints().getUpgradeCost();
-      System.out.println(skillDistribution.toString());
-      player.getDamageEfficiency();
+      System.out.println(player.optimizeLootChance());
+      Instant end = Instant.now();
+      System.out.println(Duration.between(start, end).toMillis());
     }
 }
