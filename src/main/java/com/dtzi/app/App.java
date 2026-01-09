@@ -45,7 +45,7 @@ public class App {
       // Buffs buffs = new Buffs(pill, 0, countryBonus, muBonus, regBonus, polBonus);
       // Skills skills = new Skills(0);
       Player player = new Player(gear, skills, buffs, food);
-      System.out.println(player.optimizeLootChance());
+      System.out.println(player.optimizeSkillPoints2());
       System.out.println("Damage per 8 hours: " + player.getDamageEfficiency()[0]);
       Instant end = Instant.now();
       System.out.println(Duration.between(start, end).toMillis());

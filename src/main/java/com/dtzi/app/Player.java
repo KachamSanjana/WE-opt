@@ -12,7 +12,7 @@ public class Player {
   private Food food;
   private Map<String, Float> totalStats;
   private Buffs buffs;
-  static Map<String, Float> BASE_STATS = new HashMap<>() {
+  private static Map<String, Float> BASE_STATS = new HashMap<>() {
     {
       put("attackDamage", 100f);
       put("criticalRate", 0.1f);
@@ -59,7 +59,35 @@ public class Player {
     Map<String, Float> fullMap = StatsMaps.addMaps(base, gear);
     fullMap = StatsMaps.addMaps(fullMap, skills);
     return fullMap;
+  }
 
+  private float costOfFood(float hunger, float hitsOver8h) {
+    float hungerRegen = (float) hunger/10;
+    return (hungerRegen * 8 + hunger) / hitsOver8h * this.food.getPrice();
+  }
+  private float costOfArmor(float dodge) {
+    return this.gear.getArmorCost() * (1 - dodge) / 100;
+  }
+  private float costOfShooting() {
+    return this.gear.getWeapon().getPrice() / 100 + this.gear.getWeapon().getAmmo().getPrice();
+  }
+
+  public float getCostPerHit(Map<String, Float> statsMap, float hitsOver8h) {
+    float costPerHit;
+
+    float hunger = statsMap.get("hunger");
+    float dodge = statsMap.get("dodge");
+    float costOfFood = this.costOfFood(hunger, hitsOver8h);
+    float costOfArmor = this.costOfArmor(dodge);
+    float costOfShooting = this.costOfShooting();
+    costPerHit = costOfArmor + costOfShooting + costOfFood + this.buffs.pill().price() / hitsOver8h;
+
+    return costPerHit;
+  }
+
+  private float totalCases(Map<String, Float> statsMap, float hitsOver8h) {
+    float lootChance = statsMap.get("lootChance");
+    return lootChance * hitsOver8h * this.getCasesOverDebuff(statsMap);
   }
 
   public float[] getDamageEfficiency() {
@@ -70,17 +98,8 @@ public class Player {
     float hitDamage = this.hitDamage(fullMap) * this.buffs.getMultiplier() * this.gear.getWeapon().getAmmo().getBonus();
     float dmgOver8h = hitDamage * hitsOver8h;
 
-    float dodge = fullMap.get("dodge");
-    float hunger = fullMap.get("hunger");
-
-    float costOfArmor = this.gear.getArmorCost() * (1 - dodge) / 100;
-    float costOfShooting = this.gear.getWeapon().getPrice() / 100 + this.gear.getWeapon().getAmmo().getPrice();
-    float hungerRegen = (float) hunger / 10;
-    float costOfFood = (hungerRegen*8 + hunger) / hitsOver8h;
-    float costPerHit = costOfArmor + costOfShooting + costOfFood + this.buffs.pill().price() / hitsOver8h;
-
-    float lootChance = fullMap.get("lootChance");
-    float totalCases = lootChance * hitsOver8h + this.casesOverDebuff(fullMap);
+    float costPerHit = this.getCostPerHit(fullMap, hitsOver8h);
+    float totalCases = this.totalCases(fullMap, hitsOver8h);
     float ecoSkillIncome = this.ecoSkillIncome(fullMap);
 
     float hitsPer1k = 1000 / hitDamage;
@@ -120,7 +139,7 @@ public class Player {
     return income;
   }
 
-  public float casesOverDebuff(Map<String, Float> statsMap) {
+  public float getCasesOverDebuff(Map<String, Float> statsMap) {
     float cases;
     float lootChance = statsMap.get("lootChance");
     float armor = statsMap.get("armor") - 0.2f;
@@ -157,64 +176,12 @@ public class Player {
     return hitDmg;
   }
 
-  private Number[] testUpgrades(Skills skills, String statType) {
-    Number[] returnValue = new Number[2];
-    int bestUpgradeCount = 0;
-    float bestDamageEff = Float.NEGATIVE_INFINITY;
-    int skillPoints = skills.getSkillPoints();
-    float[] baseDmgEff = this.getDamageEfficiency();
-    float baseDmg = baseDmgEff[0];
-    float baseCostPer1k = baseDmgEff[1];
-    for (int upgradeCount = 0; upgradeCount < 10; upgradeCount++) {
-      this.skills.increaseLevel(statType, upgradeCount);
-      int skillPointsLeft = this.skills.getSkillPoints();
-      if (skillPointsLeft < 0 || this.skills.getUpgradeCost().get(statType) == 10) {
-        returnValue[0] = bestDamageEff;
-        returnValue[1] = bestUpgradeCount;
-        this.skills.decreaseLevel(statType, upgradeCount);
-        return returnValue;
-      }
-
-      int skillPointsDiff = skillPoints - skillPointsLeft;
-      float[] newDmgEff = this.getDamageEfficiency();
-      float newDmg = newDmgEff[0];
-      float newCostPer1k = newDmgEff[1];
-      float relativeDamageIncrease = (1 - newDmg / baseDmg) / skillPointsDiff;
-      float relativeCostDecrease = (1 - baseCostPer1k / newCostPer1k) / skillPointsDiff;
-      float efficiency = relativeCostDecrease * relativeDamageIncrease;
-      if (efficiency > bestDamageEff) {
-        bestDamageEff = efficiency;
-        bestUpgradeCount = upgradeCount;
-      }
-
-      this.skills.decreaseLevel(statType, upgradeCount);
-    }
-    returnValue[0] = bestDamageEff;
-    returnValue[1] = bestUpgradeCount;
-    return returnValue;
-  }
-
-  private float testUpgrade(Skills skills, String statType) {
-    float efficiency;
-    float[] baseDmgEff = this.getDamageEfficiency();
-    float baseDmg = baseDmgEff[0];
-    float baseCostPer1k = baseDmgEff[1];
-    int requiredSkillPoints = this.skills.getUpgradeCost().get(statType);
-    if (requiredSkillPoints > this.skills.getSkillPoints() || this.skills.getUpgradeCost().get(statType) == 10) {
-      return 0;
-    }
-    this.skills.increaseLevel(statType);
-    float[] newDmgEff = this.getDamageEfficiency();
-    float newDmg = newDmgEff[0];
-    float newCostPer1k = newDmgEff[1];
-    float relativeDamageIncrease = (1 - newDmg / baseDmg) / requiredSkillPoints;
-    float relativeCostDecrease = (1 - baseCostPer1k / newCostPer1k) / requiredSkillPoints;
-    efficiency = relativeCostDecrease * relativeDamageIncrease;
-    this.skills.decreaseLevel(statType);
-    return efficiency;
+  private Number[] prune() {
+    for (String statType : this.totalStats.
   }
 
   public Map<String, Integer> optimizeSkillPoints() {
+    this.totalStats = sumStats(BASE_STATS, this.gear.getStats(), this.skills.getStats());
 
     // Termination condition
     int skillPoints = this.skills.getSkillPoints();
@@ -222,137 +189,6 @@ public class Player {
       Map<String, Integer> upgradeCost = StatsMaps.subtractAll(this.skills.getUpgradeCost(), 1);
       return upgradeCost;
     }
-
-    float largestDamageIncreasePerSkillPoint = Float.NEGATIVE_INFINITY;
-    int largestDamageUpgradeCount = 0;
-    String largestDamageStat = "";
-
-    for (String statType : this.totalStats.keySet()) {
-      switch (statType) {
-        case "dodge", "armor":
-          Number[] bestUpgrade = this.testUpgrades(this.skills, statType);
-          float damageRatio = bestUpgrade[0].floatValue();
-          int upgradeCount = bestUpgrade[1].intValue();
-          if (damageRatio > largestDamageIncreasePerSkillPoint) {
-            largestDamageIncreasePerSkillPoint = damageRatio;
-            largestDamageUpgradeCount = upgradeCount;
-            largestDamageStat = statType;
-          }
-          break;
-        default:
-          damageRatio = this.testUpgrade(this.skills, statType);
-          if (damageRatio > largestDamageIncreasePerSkillPoint) {
-            largestDamageIncreasePerSkillPoint = damageRatio;
-            largestDamageStat = statType;
-          }
-      }
-    }
-
-    switch (largestDamageStat) {
-      case "armor", "dodge":
-        this.skills.increaseLevel(largestDamageStat, largestDamageUpgradeCount);
-        break;
-      default:
-        this.skills.increaseLevel(largestDamageStat);
-    }
     return optimizeSkillPoints();
-  }
-
-  public float testEcoSkill (String statType, Map<String, Integer> presetUpgrades) {
-
-    float ratio;
-    float[] dmgEff;
-    float[] newDmgEff;
-    int requiredSkillPoints;
-
-    for (String key : presetUpgrades.keySet()) {
-      this.skills.increaseLevel(key, presetUpgrades.get(key));
-    }
-    requiredSkillPoints = this.skills.getUpgradeCost().get(statType);
-    this.optimizeSkillPoints();
-    dmgEff = this.getDamageEfficiency();
-    float baseDmg = dmgEff[0];
-    float baseCost = dmgEff[1];
-    if (statType == "companies") {
-      System.out.println("Before application: " +
-          " stats: " + this.skills.getUpgradeCost() +
-          " dmg: " + baseDmg +
-          " eff: " + baseCost
-          );
-    }
-    this.skills.resetSkillPoints();
-
-    for (String key : presetUpgrades.keySet()) {
-      this.skills.increaseLevel(key, presetUpgrades.get(key));
-    }
-    this.skills.increaseLevel(statType);
-    this.optimizeSkillPoints();
-    newDmgEff = this.getDamageEfficiency();
-    float newDmg = newDmgEff[0];
-    float newCost = newDmgEff[1];
-    float relativeDmgDecrease = (1 - newDmg / baseDmg) / requiredSkillPoints;
-    float relativeCostDecrease = (1 - baseCost / newCost) / requiredSkillPoints;
-    if (statType == "companies") {
-      System.out.println("After application: " +
-          " stats: " + this.skills.getUpgradeCost() +
-          " dmg: " + newDmg +
-          " eff: " + newCost
-          );
-    }
-    if (statType == "companies") {
-      System.out.println(relativeCostDecrease);
-      System.out.println(relativeDmgDecrease);
-    }
-    if (relativeCostDecrease <= 0 && relativeDmgDecrease <= 0) {
-      return 0;
-    }
-    ratio = relativeCostDecrease / relativeDmgDecrease;
-    this.skills.resetSkillPoints();
-    return ratio;
-  }
-
-  public Map<String, Integer> optimizeLootChance() {
-    Set<String> ecoSkills = new HashSet<>() {
-      {
-        add("lootChance");
-        add("entre");
-        add("energy");
-        add("production");
-        add("companies");
-      }
-    };
-    Map<String, Integer> upgrades = new HashMap<>();
-    while (true) {
-      float largestRatio = Float.NEGATIVE_INFINITY;
-      String statType = "";
-      for (String stat : ecoSkills) {
-        float ratio = this.testEcoSkill(stat, upgrades);
-        if (largestRatio == Float.NEGATIVE_INFINITY) {
-          largestRatio = ratio;
-          statType = stat;
-        } else if (largestRatio < 0 && largestRatio > ratio) {
-          largestRatio = ratio;
-          statType = stat;
-        } else if (largestRatio > 0 && largestRatio < ratio) {
-          largestRatio = ratio;
-          statType = stat;
-        }
-      }
-      
-      if (largestRatio == 0) {
-        break;
-      }
-
-      try {
-        upgrades.put(statType, upgrades.get(statType) + 1);
-      } catch (NullPointerException e) {
-        upgrades.put(statType, 1);
-      }
-    }
-    for (String key : upgrades.keySet()) {
-      this.skills.increaseLevel(key, upgrades.get(key));
-    }
-    this.optimizeSkillPoints();
-    return this.skills.getUpgradeCost();
   }
 }

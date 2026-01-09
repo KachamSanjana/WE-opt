@@ -27,27 +27,21 @@ public class StatsMaps {
   static <T extends Number> boolean allLargerThan(Map<String, T> map, T value) {
     int counter = 0;
     for (T element : map.values()) {
-      if (element.floatValue() > value.floatValue()) {
-        counter++;
+      if (element.floatValue() < value.floatValue()) {
+        return false;
       }
     }
-    if (counter == map.size()) {
-      return true;
-    }
-    return false;
+    return true;
   }
 
   static <T extends Number> boolean allSmallerThan(Map<String, T> map, T value) {
     int counter = 0;
     for (T element : map.values()) {
-      if (element.floatValue() < value.floatValue()) {
-        counter++;
+      if (element.floatValue() > value.floatValue()) {
+        return false;
       }
     }
-    if (counter == map.size()) {
-      return true;
-    }
-    return false;
+    return true;
   }
 
   static Map<String, Integer> subtractAll(Map<String,Integer> map, int num) {
