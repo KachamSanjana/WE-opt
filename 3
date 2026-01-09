@@ -196,7 +196,7 @@ public class Player {
     return hitDmg;
   }
 
-  public float getScore(int skillPoints) {
+  private float getScore(int skillPoints) {
     float[] dmgEff = this.getDamageEfficiency();
     float dmgOver8h = dmgEff[0];
     float costPer1k = dmgEff[1];
@@ -218,9 +218,6 @@ public class Player {
       this.statType = statType;
     }
   }
-  public Map<String, Float> getTotalStats() {
-    return this.totalStats;
-  }
 
   private PruneResult pruneRecursive(float largestScore, String bestStatType, int depth, int requiredSkillPoints) {
     PruneResult best = new PruneResult(largestScore, bestStatType);
@@ -234,14 +231,16 @@ public class Player {
 
         if (depth == 0) {
           result = new PruneResult(score, statType);
-        } 
-        else if (best.score * 0.95f / depth > score) {
-          this.decreaseSkillLevel(statType);
-          continue;
         }
         else {
           result = this.pruneRecursive(best.score, best.statType, depth - 1, requiredSkillPoints + sp);
         }
+        // if (best.score * 0.1f > result.score) {
+        //   System.out.println("result score: " + result.score);
+        //   System.out.println(best.score);
+        //   this.decreaseSkillLevel(statType);
+        //   continue;
+        // }
         if (result.score > best.score) {
           best = new PruneResult(result.score, statType);
         }

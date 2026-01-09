@@ -100,6 +100,7 @@ public class Skills {
   }
 
   public void decreaseLevel(String statType) {
+    this.skillPoints = this.skillPoints + this.upgradeCost.get(statType) - 1;
     switch (statType) {
       case "attackDamage", "health", "hunger", "criticalDamage", "companies", "production", "energy", "entre":
         this.stats.put(statType,
@@ -114,35 +115,22 @@ public class Skills {
             (float) Math.min(1,
                 this.stats.get(statType).floatValue() - this.statIncrements.get(statType).floatValue()));
     }
-    this.skillPoints = this.skillPoints + this.upgradeCost.get(statType) - 1;
     this.upgradeCost.put(statType, this.upgradeCost.get(statType) - 1);
   }
 
-  public void increaseLevel(String statType, int timesToRepeat) throws NotEnoughSkillPointsException {
-    for (int i = 0; i <= timesToRepeat; i++) {
-      increaseLevel(statType);
-    }
-  }
-
-  public void decreaseLevel(String statType, int timesToRepeat) throws NotEnoughSkillPointsException {
-    for (int i = 0; i <= timesToRepeat; i++) {
-      decreaseLevel(statType);
-    }
-  }
-
-  Map<String, Float> getStats() {
+  public Map<String, Float> getStats() {
     return this.stats;
   }
 
-  Map<String, Float> getStatIncrements() {
+  public Map<String, Float> getStatIncrements() {
     return this.statIncrements;
   }
 
-  Map<String, Integer> getUpgradeCost() {
+  public Map<String, Integer> getUpgradeCost() {
     return this.upgradeCost;
   }
 
-  int getSkillPoints() {
+  public int getSkillPoints() {
     return this.skillPoints;
   }
 

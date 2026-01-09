@@ -12,7 +12,7 @@ public class Gear {
   private Gloves gloves;
   private Pants pants;
   private Boots boots;
-  Map<String, Float> stats = new HashMap<>() {
+  private Map<String, Float> stats = new HashMap<>() {
     {
       put("attackDamage", 0f);
       put("criticalRate", 0f);
@@ -29,7 +29,7 @@ public class Gear {
       put("companies", 0f);
     }
   };
-  float armorCost = 0f;
+  private float armorCost = 0f;
 
   public Gear() {
   }

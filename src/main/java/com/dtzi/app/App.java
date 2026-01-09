@@ -2,9 +2,10 @@ package com.dtzi.app;
 
 import com.dtzi.app.Equipment.*;
 
-import java.util.Map;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.dtzi.app.Buffs.*;
 
@@ -12,43 +13,148 @@ import com.dtzi.app.Buffs.*;
  * Hello world!
  */
 public class App {
-    public static void main(String[] args) {
-      Instant start = Instant.now();
-      Gear gear = new Gear();
-      Ammo ammo = new Ammo(0.1f, 0.15f);
-      // Ammo ammo = new Ammo(0, 0);
-      gear.setWeapon(new Weapon(87, 0.15f, ammo, 25.4f));
-      gear.setHelmet(new Helmet(19, 7.1f));
-      gear.setChest(new Chest(10, 7.1f));
-      gear.setGloves(new Gloves(10, 7.1f));
-      gear.setPants(new Pants(10, 7.1f));
-      gear.setBoots(new Boots(10, 7.5f));
-      CountryBonuses countryBonus = new CountryBonuses(0.15f, 0.15f);
-      MilitaryUnitBonuses muBonus = new MilitaryUnitBonuses(0.15f, 0.2f);
-      PoliticalBonuses polBonus = new PoliticalBonuses(false, true);
-      RegionalBonuses regBonus = new RegionalBonuses(0f, false);
-      Pill pill = new Pill(true);
-      Buffs buffs = new Buffs(pill, 0.12f, countryBonus, muBonus, regBonus, polBonus);
-      Skills skills = new Skills(80);
-      Food food = new Food(3, 7f);
-      // gear.setWeapon(new Weapon(0, 0, ammo, 0));
-      // gear.setHelmet(new Helmet(0, 0));
-      // gear.setChest(new Chest(0, 0));
-      // gear.setGloves(new Gloves(0, 0));
-      // gear.setPants(new Pants(0, 0));
-      // gear.setBoots(new Boots(0, 0));
-      // CountryBonuses countryBonus = new CountryBonuses(0, 0);
-      // MilitaryUnitBonuses muBonus = new MilitaryUnitBonuses(0, 0);
-      // PoliticalBonuses polBonus = new PoliticalBonuses(false, false);
-      // RegionalBonuses regBonus = new RegionalBonuses(0f, false);
-      // Pill pill = new Pill(false);
-      // Buffs buffs = new Buffs(pill, 0, countryBonus, muBonus, regBonus, polBonus);
-      // Skills skills = new Skills(0);
-      Player player = new Player(gear, skills, buffs, food);
-      System.out.println(player.optimizeSkillPoints());
-      System.out.println("Damage per 8 hours: " + player.getDamageEfficiency()[0] + "\n" +
-          "Cost per 1k damage: " + player.getDamageEfficiency()[1]);
-      Instant end = Instant.now();
-      System.out.println(Duration.between(start, end).toMillis());
+  public static Weapon[] generateWeapons(Ammo[] ammos) {
+    Weapon[] weapons = new Weapon[18];
+    Map<String, Map<String, Float>> possibleStats = new HashMap<>() {
+      {
+        put("grey", new HashMap<String, Float>() {
+          {
+            put("attackDamage", 37f);
+            put("criticalRate", 0.05f);
+            put("price", 2f);
+          }
+        });
+        put("green", new HashMap<String, Float>() {
+          {
+            put("attackDamage", 59f);
+            put("criticalRate", 0.1f);
+            put("price", 6f);
+          }
+        });
+        put("blue", new HashMap<String, Float>() {
+          {
+            put("attackDamage", 87f);
+            put("criticalRate", 0.15f);
+            put("price", 25f);
+          }
+        });
+        put("purple", new HashMap<String, Float>() {
+          {
+            put("attackDamage", 117f);
+            put("criticalRate", 0.20f);
+            put("price", 100f);
+          }
+        });
+        put("yellow", new HashMap<String, Float>() {
+          {
+            put("attackDamage", 155f);
+            put("criticalRate", 0.29f);
+            put("price", 200f);
+          }
+        });
+        put("red", new HashMap<String, Float>() {
+          {
+            put("attackDamage", 265f);
+            put("criticalRate", 0.39f);
+            put("price", 600f);
+          }
+        });
+      }
+    };
+    int i = 0;
+    for (Map<String, Float> weaponStats : possibleStats.values()) {
+      float attackDamage = weaponStats.get("attackDamage");
+      float criticalRate = weaponStats.get("criticalRate");
+      float price = weaponStats.get("price");
+      weapons[i++] = new Weapon(attackDamage, criticalRate, ammos[0], price);
+      weapons[i++] = new Weapon(attackDamage, criticalRate, ammos[1], price);
+      weapons[i++] = new Weapon(attackDamage, criticalRate, ammos[2], price);
     }
+    return weapons;
+  }
+
+  public static void main(String[] args) {
+    CountryBonuses countryBonus = new CountryBonuses(0.15f, 0.15f);
+    MilitaryUnitBonuses muBonus = new MilitaryUnitBonuses(0.15f, 0.2f);
+    PoliticalBonuses polBonus = new PoliticalBonuses(false, true);
+    RegionalBonuses regBonus = new RegionalBonuses(0f, false);
+    Pill pill = new Pill(true);
+    Buffs buffs = new Buffs(pill, 0.12f, countryBonus, muBonus, regBonus, polBonus);
+    Food food = new Food(3, 7f);
+
+    Instant start = Instant.now();
+    Ammo[] ammos = { new Ammo(0.1f, 0.17f), new Ammo(0.2f, 0.7f), new Ammo(0.4f, 2.94f) };
+    Weapon[] weapons = generateWeapons(ammos);
+    Helmet[] helmets = { new Helmet(9f, 1.8f), new Helmet(19f, 6.3f), new Helmet(29f, 20.8f),
+        new Helmet(39f, 58.7f), new Helmet(57f, 187.4f), new Helmet(77f, 660) };
+    Chest[] chests = { new Chest(5f, 1.8f), new Chest(10f, 6.3f), new Chest(15f, 20.8f),
+        new Chest(20f, 58.7f), new Chest(29f, 187.4f), new Chest(39f, 660) };
+    Gloves[] gloves = { new Gloves(5f, 1.8f), new Gloves(10f, 6.3f), new Gloves(15f, 20.8f),
+        new Gloves(20f, 58.7f), new Gloves(29f, 187.4f), new Gloves(39f, 660) };
+    Pants[] pants = { new Pants(5f, 1.8f), new Pants(10f, 6.3f), new Pants(15f, 20.8f),
+        new Pants(20f, 58.7f), new Pants(29f, 187.4f), new Pants(39f, 660) };
+    Boots[] boots = { new Boots(0.05f, 1.8f), new Boots(10f, 6.3f), new Boots(15f, 20.8f),
+        new Boots(20f, 58.7f), new Boots(29f, 187.4f), new Boots(39f, 660) };
+    // Define gear quality range: indices 1 to 3 inclusive
+    int minIndex = 1;
+    int maxIndex = 3;
+
+    // Track best result
+    float bestScore = 0;
+    String bestConfig = "";
+    int totalTests = 0;
+    for (Weapon weapon : weapons) {
+      if (!isBlueWeapon(weapon))
+        continue;
+
+      for (int h = minIndex; h <= maxIndex; h++) {
+        for (int c = minIndex; c <= maxIndex; c++) {
+          for (int g = minIndex; g <= maxIndex; g++) {
+            for (int p = minIndex; p <= maxIndex; p++) {
+              for (int b = minIndex; b <= maxIndex; b++) {
+                Gear gear = new Gear();
+                gear.setWeapon(weapon);
+                gear.setHelmet(helmets[h]);
+                gear.setChest(chests[c]);
+                gear.setGloves(gloves[g]);
+                gear.setPants(pants[p]);
+                gear.setBoots(boots[b]);
+                Skills skills = new Skills(80);
+
+                Player player = new Player(gear, skills, buffs, food);
+                Map<String, Integer> optimizedPoints = player.optimizeSkillPoints(); // assumed to return int or void?
+                float[] efficiency = player.getDamageEfficiency(); // [damagePer8h, costPer1k]
+                float score = player.getScore(player.getSkills().getSkillPoints());
+                float damage = efficiency[0];
+                if (score > bestScore) {
+                  bestScore = score;
+                  bestConfig = String.format(
+                      "Weapon: AD=%.1f CR=%.2f Ammo(Q=%.1f,P=%.2f) | " +
+                          "H%d C%d G%d P%d B%d | Damage: %.2f | Cost/1k: %.2f",
+                      weapon.getAttackDamage(), weapon.getCriticalRate(),
+                      weapon.getAmmo().getBonus(), weapon.getAmmo().getPrice(),
+                      h, c, g, p, b,
+                      damage, efficiency[1]) + optimizedPoints.toString();
+                }
+
+                totalTests++;
+                System.out.println(totalTests);
+              }
+            }
+          }
+        }
+      }
+    }
+    Instant end = Instant.now();
+    long durationMs = Duration.between(start, end).toMillis();
+    System.out.println("=== OPTIMIZATION RESULTS ===");
+    System.out.println("Total combinations tested: " + totalTests);
+    System.out.println("Best configuration:");
+    System.out.println(bestConfig);
+    System.out.println("\nTime taken: " + durationMs + " ms");
+  }
+
+  public static boolean isBlueWeapon(Weapon w) {
+    return w.getAttackDamage() == 87f && w.getCriticalRate() == 0.15f;
+  }
 }
