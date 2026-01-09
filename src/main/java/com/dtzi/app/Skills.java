@@ -4,6 +4,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Skills {
+  public class NotEnoughSkillPointsException extends Exception {
+    NotEnoughSkillPointsException(String message) {
+      super(message);
+    }
+  }
+  public class LevelTooHighException extends Exception {
+    LevelTooHighException(String message) {
+      super(message);
+    }
+  }
   private Map<String, Float> stats = new HashMap<String, Float>() {
     {
       put("attackDamage", 0f);
@@ -63,7 +73,16 @@ public class Skills {
     this.originalSkillPoints = sp;
   }
 
-  public void increaseLevel(String statType) {
+  public void increaseLevel(String statType) throws NotEnoughSkillPointsException, LevelTooHighException {
+    if (this.upgradeCost.get(statType) > 10) {
+      throw new LevelTooHighException("Current level: " + this.upgradeCost.get(statType));
+    }
+    this.skillPoints = this.skillPoints - this.upgradeCost.get(statType);
+    if (this.skillPoints < 0) {
+      this.skillPoints = this.skillPoints + this.upgradeCost.get(statType);
+      throw new NotEnoughSkillPointsException("Available skill points: " + this.skillPoints + "\n" +
+          "Necessary skill points: " + this.upgradeCost.get(statType));
+    }
     switch (statType) {
       case "attackDamage", "health", "hunger", "criticalDamage", "companies", "production", "energy", "entre":
         this.stats.put(statType,
@@ -77,7 +96,6 @@ public class Skills {
         this.stats.put(statType,
             (float) Math.min(1, this.stats.get(statType) + this.statIncrements.get(statType)));
     }
-    this.skillPoints = this.skillPoints - this.upgradeCost.get(statType);
     this.upgradeCost.put(statType, this.upgradeCost.get(statType) + 1);
   }
 
@@ -100,13 +118,13 @@ public class Skills {
     this.upgradeCost.put(statType, this.upgradeCost.get(statType) - 1);
   }
 
-  public void increaseLevel(String statType, int timesToRepeat) {
+  public void increaseLevel(String statType, int timesToRepeat) throws NotEnoughSkillPointsException {
     for (int i = 0; i <= timesToRepeat; i++) {
       increaseLevel(statType);
     }
   }
 
-  public void decreaseLevel(String statType, int timesToRepeat) {
+  public void decreaseLevel(String statType, int timesToRepeat) throws NotEnoughSkillPointsException {
     for (int i = 0; i <= timesToRepeat; i++) {
       decreaseLevel(statType);
     }

@@ -1,10 +1,10 @@
 package com.dtzi.app;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.HashMap;
-import java.util.HashSet;
 import com.dtzi.app.Buffs.Buffs;
+import com.dtzi.app.Skills.LevelTooHighException;
+import com.dtzi.app.Skills.NotEnoughSkillPointsException;
 
 public class Player {
   private Gear gear;
@@ -62,17 +62,19 @@ public class Player {
   }
 
   private float costOfFood(float hunger, float hitsOver8h) {
-    float hungerRegen = (float) hunger/10;
+    float hungerRegen = (float) hunger / 10;
     return (hungerRegen * 8 + hunger) / hitsOver8h * this.food.getPrice();
   }
+
   private float costOfArmor(float dodge) {
     return this.gear.getArmorCost() * (1 - dodge) / 100;
   }
+
   private float costOfShooting() {
     return this.gear.getWeapon().getPrice() / 100 + this.gear.getWeapon().getAmmo().getPrice();
   }
 
-  public float getCostPerHit(Map<String, Float> statsMap, float hitsOver8h) {
+  public float costPerHit(Map<String, Float> statsMap, float hitsOver8h) {
     float costPerHit;
 
     float hunger = statsMap.get("hunger");
@@ -87,7 +89,7 @@ public class Player {
 
   private float totalCases(Map<String, Float> statsMap, float hitsOver8h) {
     float lootChance = statsMap.get("lootChance");
-    return lootChance * hitsOver8h * this.getCasesOverDebuff(statsMap);
+    return lootChance * hitsOver8h + this.getCasesOverDebuff(statsMap);
   }
 
   public float[] getDamageEfficiency() {
@@ -98,14 +100,19 @@ public class Player {
     float hitDamage = this.hitDamage(fullMap) * this.buffs.getMultiplier() * this.gear.getWeapon().getAmmo().getBonus();
     float dmgOver8h = hitDamage * hitsOver8h;
 
-    float costPerHit = this.getCostPerHit(fullMap, hitsOver8h);
+    float costPerHit = this.costPerHit(fullMap, hitsOver8h);
     float totalCases = this.totalCases(fullMap, hitsOver8h);
     float ecoSkillIncome = this.ecoSkillIncome(fullMap);
+    float damageIncome = dmgOver8h / 1000 * 0.25f;
+    float missionIncome = 10 + 30 / 7;
 
     float hitsPer1k = 1000 / hitDamage;
     float caseReturnPer1k = totalCases / hitsOver8h * hitsPer1k * CASE_PRICE;
     float ecoSkillsReturnPer1k = ecoSkillIncome / hitsOver8h * hitsPer1k;
-    float costPer1k = costPerHit * hitsPer1k - caseReturnPer1k - ecoSkillsReturnPer1k;
+    float damageIncomePer1k = damageIncome / hitsOver8h * hitsPer1k;
+    float missionIncomePer1k = missionIncome / hitsOver8h * hitsPer1k;
+    float costPer1k = costPerHit * hitsPer1k - caseReturnPer1k - ecoSkillsReturnPer1k - damageIncomePer1k
+        - missionIncomePer1k;
     // System.out.println(costPerHit * hitsPer1k);
     // System.out.println(caseReturnPer1k + ecoSkillsReturnPer1k);
     // System.out.println(costPer1k);
@@ -124,14 +131,14 @@ public class Player {
     float companyIncome = this.companyIncome(statsMap);
     float entreIncome = prod * entre / 10 * 24 * PP_VALUE;
     float energyIncome = prod * energy / 10 * 24 * PP_VALUE * 0.95f; // tax deducted
-    income = companyIncome + entreIncome + energyIncome;  
+    income = companyIncome + entreIncome + energyIncome;
     return income;
 
   }
 
-  public float companyIncome (Map<String, Float> statsMap) {
+  public float companyIncome(Map<String, Float> statsMap) {
     float income;
-    float AVERAGE_COMPANY_LVL = 5.2f;
+    float AVERAGE_COMPANY_LVL = 7f;
     float PP_VALUE = 0.087f;
     float companies = statsMap.get("companies");
     float incomePerCompany = PP_VALUE * AVERAGE_COMPANY_LVL;
@@ -142,10 +149,13 @@ public class Player {
   public float getCasesOverDebuff(Map<String, Float> statsMap) {
     float cases;
     float lootChance = statsMap.get("lootChance");
-    float armor = statsMap.get("armor") - 0.2f;
-    float dodge = statsMap.get("dodge") - 0.1f;
+    Gear gear = this.getGear();
+    float eqArmor = gear.getChest().getStat() + gear.getPants().getStat();
+    float eqDodge = gear.getBoots().getStat();
+    float armor = statsMap.get("armor") - eqArmor;
+    float dodge = statsMap.get("dodge") - eqDodge;
     float hpRegen = statsMap.get("health");
-    int hitsOverDebuff = (int) Math.floor(hpRegen * 6 / (1-dodge) / (1-armor));
+    int hitsOverDebuff = (int) Math.floor(hpRegen * 6 / (1 - dodge) / (1 - armor));
     cases = lootChance * hitsOverDebuff;
     return cases;
   }
@@ -176,18 +186,79 @@ public class Player {
     return hitDmg;
   }
 
-  private Number[] prune() {
-    for (String statType : this.totalStats.
+  private float getScore(int skillPoints) {
+    float[] dmgEff = this.getDamageEfficiency();
+    float dmgOver8h = dmgEff[0];
+    float costPer1k = dmgEff[1];
+    float multiplier;
+    if (costPer1k < 0) {
+      multiplier = 1 + Math.abs(costPer1k) / skillPoints;
+    } else
+      multiplier = 0f;
+    float score = dmgOver8h * multiplier;
+    return score;
+  }
+
+  private class PruneResult {
+    float score;
+    String statType;
+
+    PruneResult(float score, String statType) {
+      this.score = score;
+      this.statType = statType;
+    }
+  }
+
+  private PruneResult pruneRecursive(float largestScore, String bestStatType, int depth, int requiredSkillPoints) {
+    PruneResult best = new PruneResult(largestScore, bestStatType);
+    for (String statType : this.totalStats.keySet()) {
+      PruneResult result;
+      try {
+        int sp = this.skills.getUpgradeCost().get(statType);
+        this.skills.increaseLevel(statType);
+
+        if (depth == 0) {
+          float score = this.getScore(requiredSkillPoints + sp);
+          result = new PruneResult(score, statType);
+        } else {
+          result = this.pruneRecursive(best.score, best.statType, depth - 1, requiredSkillPoints + sp);
+        }
+        if (result.score > best.score) {
+          best = new PruneResult(result.score, statType);
+        }
+        this.skills.decreaseLevel(statType);
+      } catch (NotEnoughSkillPointsException | LevelTooHighException e) {
+        if (depth < 5) {
+          float score = this.getScore(requiredSkillPoints);
+          result = new PruneResult(score, statType);
+          if (result.score > best.score) {
+            best = new PruneResult(result.score, statType);
+          }
+        }
+        // System.out.println(e.getMessage());
+        continue;
+      }
+    }
+    return best;
   }
 
   public Map<String, Integer> optimizeSkillPoints() {
-    this.totalStats = sumStats(BASE_STATS, this.gear.getStats(), this.skills.getStats());
-
     // Termination condition
-    int skillPoints = this.skills.getSkillPoints();
-    if (StatsMaps.allLargerThan(this.skills.getUpgradeCost(), skillPoints)) {
+    float largestScore = Float.NEGATIVE_INFINITY;
+    String bestStatType = "";
+    int depth = 5;
+    int requiredSkillPoints = 0;
+    PruneResult returnValue = this.pruneRecursive(largestScore, bestStatType, depth, requiredSkillPoints);
+    bestStatType = returnValue.statType;
+    System.out.println("best stat: " + bestStatType + ", best score: " + returnValue.score);
+    if (bestStatType.isEmpty()) {
       Map<String, Integer> upgradeCost = StatsMaps.subtractAll(this.skills.getUpgradeCost(), 1);
       return upgradeCost;
+    }
+    try {
+      this.skills.increaseLevel(bestStatType);
+    } catch (NotEnoughSkillPointsException | LevelTooHighException e) {
+      // System.out.println(e.getMessage());
     }
     return optimizeSkillPoints();
   }

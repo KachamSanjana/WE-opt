@@ -29,8 +29,8 @@ public class App {
       RegionalBonuses regBonus = new RegionalBonuses(0f, false);
       Pill pill = new Pill(true);
       Buffs buffs = new Buffs(pill, 0.12f, countryBonus, muBonus, regBonus, polBonus);
-      Skills skills = new Skills(90);
-      Food food = new Food(3, 6);
+      Skills skills = new Skills(80);
+      Food food = new Food(3, 7f);
       // gear.setWeapon(new Weapon(0, 0, ammo, 0));
       // gear.setHelmet(new Helmet(0, 0));
       // gear.setChest(new Chest(0, 0));
@@ -45,8 +45,9 @@ public class App {
       // Buffs buffs = new Buffs(pill, 0, countryBonus, muBonus, regBonus, polBonus);
       // Skills skills = new Skills(0);
       Player player = new Player(gear, skills, buffs, food);
-      System.out.println(player.optimizeSkillPoints2());
-      System.out.println("Damage per 8 hours: " + player.getDamageEfficiency()[0]);
+      System.out.println(player.optimizeSkillPoints());
+      System.out.println("Damage per 8 hours: " + player.getDamageEfficiency()[0] + "\n" +
+          "Cost per 1k damage: " + player.getDamageEfficiency()[1]);
       Instant end = Instant.now();
       System.out.println(Duration.between(start, end).toMillis());
     }
