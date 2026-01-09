@@ -66,7 +66,7 @@ public class Skills {
     }
   };
   private int skillPoints;
-  private int originalSkillPoints;
+  public int originalSkillPoints;
 
   public Skills(int sp) {
     this.skillPoints = sp;

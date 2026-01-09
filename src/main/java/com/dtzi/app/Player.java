@@ -201,10 +201,10 @@ public class Player {
     float dmgOver8h = dmgEff[0];
     float costPer1k = dmgEff[1];
     if (costPer1k < 0) {
-      float multiplier = 1 + Math.abs(costPer1k) / skillPoints;
+        float multiplier = 1 - costPer1k / skillPoints;
       return dmgOver8h * multiplier;
     } else {
-      float divisor = 1 + Math.abs(costPer1k) * skillPoints;
+      float divisor = 1 + costPer1k * skillPoints;
       return dmgOver8h / divisor;
     }
   }
@@ -235,7 +235,7 @@ public class Player {
         if (depth == 0) {
           result = new PruneResult(score, statType);
         } 
-        else if (best.score * 0.95f / depth > score) {
+        else if (best.score * 0.9f / depth > score) {
           this.decreaseSkillLevel(statType);
           continue;
         }

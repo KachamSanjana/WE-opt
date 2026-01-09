@@ -14,7 +14,7 @@ import com.dtzi.app.Buffs.*;
  */
 public class App {
   public static Weapon[] generateWeapons(Ammo[] ammos) {
-    Weapon[] weapons = new Weapon[18];
+    Weapon[] weapons = new Weapon[6];
     Map<String, Map<String, Float>> possibleStats = new HashMap<>() {
       {
         put("grey", new HashMap<String, Float>() {
@@ -67,8 +67,8 @@ public class App {
       float criticalRate = weaponStats.get("criticalRate");
       float price = weaponStats.get("price");
       weapons[i++] = new Weapon(attackDamage, criticalRate, ammos[0], price);
-      weapons[i++] = new Weapon(attackDamage, criticalRate, ammos[1], price);
-      weapons[i++] = new Weapon(attackDamage, criticalRate, ammos[2], price);
+      // weapons[i++] = new Weapon(attackDamage, criticalRate, ammos[1], price);
+      // weapons[i++] = new Weapon(attackDamage, criticalRate, ammos[2], price);
     }
     return weapons;
   }
@@ -83,7 +83,11 @@ public class App {
     Food food = new Food(3, 7f);
 
     Instant start = Instant.now();
-    Ammo[] ammos = { new Ammo(0.1f, 0.17f), new Ammo(0.2f, 0.7f), new Ammo(0.4f, 2.94f) };
+    Ammo[] ammos = { 
+      new Ammo(0.1f, 0.17f), 
+      new Ammo(0.2f, 0.7f),
+    //  new Ammo(0.4f, 2.94f),
+    };
     Weapon[] weapons = generateWeapons(ammos);
     Helmet[] helmets = { new Helmet(9f, 1.8f), new Helmet(19f, 6.3f), new Helmet(29f, 20.8f),
         new Helmet(39f, 58.7f), new Helmet(57f, 187.4f), new Helmet(77f, 660) };
@@ -96,8 +100,8 @@ public class App {
     Boots[] boots = { new Boots(0.05f, 1.8f), new Boots(10f, 6.3f), new Boots(15f, 20.8f),
         new Boots(20f, 58.7f), new Boots(29f, 187.4f), new Boots(39f, 660) };
     // Define gear quality range: indices 1 to 3 inclusive
-    int minIndex = 1;
-    int maxIndex = 3;
+    int minIndex = 0;
+    int maxIndex = 2;
 
     // Track best result
     float bestScore = 0;
@@ -124,7 +128,7 @@ public class App {
                 Player player = new Player(gear, skills, buffs, food);
                 Map<String, Integer> optimizedPoints = player.optimizeSkillPoints(); // assumed to return int or void?
                 float[] efficiency = player.getDamageEfficiency(); // [damagePer8h, costPer1k]
-                float score = player.getScore(player.getSkills().getSkillPoints());
+                float score = player.getScore(player.getSkills().originalSkillPoints);
                 float damage = efficiency[0];
                 if (score > bestScore) {
                   bestScore = score;
@@ -155,6 +159,6 @@ public class App {
   }
 
   public static boolean isBlueWeapon(Weapon w) {
-    return w.getAttackDamage() == 87f && w.getCriticalRate() == 0.15f;
+    return w.getAttackDamage() == 87f;
   }
 }
