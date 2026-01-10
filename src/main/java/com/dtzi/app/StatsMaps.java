@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class StatsMaps {
 
-  static Map<String, Float> addMaps(Map<String, Float> map1, Map<String, Float> map2) {
+  static Map<String, Float> add(Map<String, Float> map1, Map<String, Float> map2) {
     Map<String, Float> sumMap = new HashMap<>();
     for (String elem : map1.keySet()) {
       switch (elem) {
@@ -19,6 +19,25 @@ public class StatsMaps {
         default:
           sumMap.put(elem,
               (float) Math.min(1, map1.get(elem) + map2.get(elem)));
+      }
+    }
+    return sumMap;
+  }
+
+  static Map<String, Float> subtract(Map<String, Float> map1, Map<String, Float> map2) {
+    Map<String, Float> sumMap = new HashMap<>();
+    for (String elem : map1.keySet()) {
+      switch (elem) {
+        case "attackDamage", "health", "hunger", "criticalDamage", "production", "companies", "entre", "energy":
+          sumMap.put(elem, map1.get(elem) - map2.get(elem));
+          break;
+        case "armor":
+          sumMap.put(elem,
+              (float) Math.min(0.9, map1.get(elem) - map2.get(elem)));
+          break;
+        default:
+          sumMap.put(elem,
+              (float) Math.min(1, map1.get(elem) - map2.get(elem)));
       }
     }
     return sumMap;

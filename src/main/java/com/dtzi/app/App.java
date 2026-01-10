@@ -100,13 +100,14 @@ public class App {
     Boots[] boots = { new Boots(0.05f, 1.8f), new Boots(10f, 6.3f), new Boots(15f, 20.8f),
         new Boots(20f, 58.7f), new Boots(29f, 187.4f), new Boots(39f, 660) };
     // Define gear quality range: indices 1 to 3 inclusive
-    int minIndex = 0;
+    int minIndex = 1;
     int maxIndex = 2;
 
     // Track best result
     float bestScore = 0;
     String bestConfig = "";
     int totalTests = 0;
+    Gear gear = new Gear();
     for (Weapon weapon : weapons) {
       if (!isBlueWeapon(weapon))
         continue;
@@ -116,14 +117,13 @@ public class App {
           for (int g = minIndex; g <= maxIndex; g++) {
             for (int p = minIndex; p <= maxIndex; p++) {
               for (int b = minIndex; b <= maxIndex; b++) {
-                Gear gear = new Gear();
                 gear.setWeapon(weapon);
                 gear.setHelmet(helmets[h]);
                 gear.setChest(chests[c]);
                 gear.setGloves(gloves[g]);
                 gear.setPants(pants[p]);
                 gear.setBoots(boots[b]);
-                Skills skills = new Skills(80);
+                Skills skills = new Skills(116);
 
                 Player player = new Player(gear, skills, buffs, food);
                 Map<String, Integer> optimizedPoints = player.optimizeSkillPoints(); // assumed to return int or void?
@@ -159,6 +159,6 @@ public class App {
   }
 
   public static boolean isBlueWeapon(Weapon w) {
-    return w.getAttackDamage() == 87f;
+    return w.getAttackDamage() == 117f || w.getAttackDamage() == 87f;
   }
 }

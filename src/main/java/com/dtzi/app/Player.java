@@ -42,8 +42,8 @@ public class Player {
 
   private Map<String, Float> sumStats(Map<String, Float> base, Map<String, Float> gear, Map<String, Float> skills) {
     Map<String, Float> fullMap;
-    fullMap = StatsMaps.addMaps(base, gear);
-    fullMap = StatsMaps.addMaps(fullMap, skills);
+    fullMap = StatsMaps.add(base, gear);
+    fullMap = StatsMaps.add(fullMap, skills);
     return fullMap;
   }
 
@@ -235,7 +235,7 @@ public class Player {
         if (depth == 0) {
           result = new PruneResult(score, statType);
         } 
-        else if (best.score * 0.9f / depth > score) {
+        else if (best.score * 0.95f / depth > score) {
           this.decreaseSkillLevel(statType);
           continue;
         }
