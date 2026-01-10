@@ -248,7 +248,7 @@ public class Player {
         if (depth == 0) {
           result = new PruneResult(score, statType);
         } 
-        else if (best.score * 0.95f / depth > score) {
+        else if (best.score * 0.9f / depth > score) {
           this.decreaseSkillLevel(statType);
           continue;
         }

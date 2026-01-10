@@ -101,13 +101,13 @@ public class App {
         new Boots(20f, 58.7f), new Boots(29f, 187.4f), new Boots(39f, 660) };
     // Define gear quality range: indices 1 to 3 inclusive
     int minIndex = 1;
-    int maxIndex = 2;
+    int maxIndex = 3;
 
     // Track best result
     float bestScore = 0;
     String bestConfig = "";
     int totalTests = 0;
-    Skills skills = new Skills(116);
+    Skills skills = new Skills(88);
     Player player = new Player(skills, buffs, food);
     for (Weapon weapon : weapons) {
       if (!isBlueWeapon(weapon))
@@ -151,12 +151,11 @@ public class App {
         }
       }
     }
-// Total combinations tested: 64
-// Best configuration:
-// Weapon: AD=87.0 CR=0.15 Ammo(Q=1.1,P=0.17) | H1 C2 G2 P2 B2 | Damage: 2
-// 69800.47 | Cost/1k: -0.04{dodge=10, lootChance=3, production=0, precisi
-// on=2, health=2, hunger=3, criticalRate=3, companies=4, armor=3, critica
-// lDamage=3, entre=0, attackDamage=5, energy=0}
+// Total combinations tested: 486
+// Weapon: AD=87.0 CR=0.15 Ammo(Q=1.1,P=0.17) | H2 C2 G2 P2 B1 | Damage: 1
+// 84073.75 | Cost/1k: -0.00{dodge=6, lootChance=2, production=0, precisio
+// n=2, health=2, hunger=3, criticalRate=2, companies=6, armor=4, critical
+// Damage=2, entre=0, attackDamage=5, energy=0}
     Instant end = Instant.now();
     long durationMs = Duration.between(start, end).toMillis();
     System.out.println("=== OPTIMIZATION RESULTS ===");
@@ -167,6 +166,6 @@ public class App {
   }
 
   public static boolean isBlueWeapon(Weapon w) {
-    return w.getAttackDamage() == 117f || w.getAttackDamage() == 87f;
+    return w.getAttackDamage() == 59f || w.getAttackDamage() == 87f;
   }
 }
