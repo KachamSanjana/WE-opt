@@ -12,7 +12,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="US"/>
     <property name="sun.boot.library.path" value="/home/tauras/Documents/jdk-25/lib"/>
-    <property name="sun.java.command" value="/home/tauras/WE-opt/target/surefire/surefirebooter-20260110143641230_3.jar /home/tauras/WE-opt/target/surefire 2026-01-10T14-36-41_151-jvmRun1 surefire-20260110143641230_1tmp surefire_0-20260110143641230_2tmp"/>
+    <property name="sun.java.command" value="/home/tauras/WE-opt/target/surefire/surefirebooter-20260110144551222_3.jar /home/tauras/WE-opt/target/surefire 2026-01-10T14-45-51_142-jvmRun1 surefire-20260110144551222_1tmp surefire_0-20260110144551222_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="/home/tauras/WE-opt/target/test-classes:/home/tauras/WE-opt/target/classes:/home/tauras/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.11.0/junit-jupiter-api-5.11.0.jar:/home/tauras/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar:/home/tauras/.m2/repository/org/junit/platform/junit-platform-commons/1.11.0/junit-platform-commons-1.11.0.jar:/home/tauras/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/tauras/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.11.0/junit-jupiter-params-5.11.0.jar:"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -27,7 +27,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
-    <property name="surefire.real.class.path" value="/home/tauras/WE-opt/target/surefire/surefirebooter-20260110143641230_3.jar"/>
+    <property name="surefire.real.class.path" value="/home/tauras/WE-opt/target/surefire/surefirebooter-20260110144551222_3.jar"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="25+37-LTS-3491"/>
     <property name="user.name" value="tauras"/>
