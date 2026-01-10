@@ -3,8 +3,8 @@ package com.dtzi.app;
 import java.util.Map;
 import java.util.HashMap;
 import com.dtzi.app.Buffs.Buffs;
-import com.dtzi.app.Skills.LevelTooHighException;
-import com.dtzi.app.Skills.NotEnoughSkillPointsException;
+import com.dtzi.app.Equipment.*;
+import com.dtzi.app.Skills.SkillPointException;
 
 public class Player {
   private Gear gear;
@@ -32,19 +32,33 @@ public class Player {
   };
   float CASE_PRICE = 4.7f;
 
-  Player(Gear gear, Skills skills, Buffs buffs, Food food) {
-    this.gear = gear;
+  Player(Skills skills, Buffs buffs, Food food) {
     this.food = food;
     this.skills = skills;
-    this.totalStats = sumStats(BASE_STATS, this.gear.getStats(), this.skills.getStats());
+    this.totalStats = StatsMaps.addMaps(BASE_STATS, skills.getStats());
     this.buffs = buffs;
   }
 
-  private Map<String, Float> sumStats(Map<String, Float> base, Map<String, Float> gear, Map<String, Float> skills) {
-    Map<String, Float> fullMap;
-    fullMap = StatsMaps.add(base, gear);
-    fullMap = StatsMaps.add(fullMap, skills);
-    return fullMap;
+  void setGear(Gear gear) {
+    if (this.gear != null) {
+      this.totalStats = StatsMaps.subtractMaps(this.totalStats, this.gear.getStats());
+      this.totalStats = StatsMaps.addMaps(this.totalStats, gear.getStats());
+      this.gear = gear;
+    } else {
+      this.totalStats = StatsMaps.addMaps(this.totalStats, gear.getStats());
+      this.gear = gear;
+    }
+  }
+
+  void resetSkills() {
+    this.totalStats = StatsMaps.subtractMaps(this.totalStats, this.skills.getStats());
+    skills.reset();
+  }
+
+  void setSkills(Skills skills) {
+    this.totalStats = StatsMaps.subtractMaps(this.totalStats, this.skills.getStats());
+    this.totalStats = StatsMaps.addMaps(this.totalStats, skills.getStats());
+    this.skills = skills;
   }
 
   Gear getGear() {
@@ -55,7 +69,7 @@ public class Player {
     return this.skills;
   }
 
-  private void increaseSkillLevel(String skill) throws NotEnoughSkillPointsException, LevelTooHighException  {
+  private void increaseSkillLevel(String skill) throws SkillPointException {
     this.skills.increaseLevel(skill);
     this.totalStats.put(skill, this.totalStats.get(skill) + this.skills.getStatIncrements().get(skill));
   }
@@ -222,8 +236,7 @@ public class Player {
     return this.totalStats;
   }
 
-  private PruneResult pruneRecursive(float largestScore, String bestStatType, int depth, int requiredSkillPoints) {
-    PruneResult best = new PruneResult(largestScore, bestStatType);
+  private PruneResult pruneRecursive(PruneResult best, int depth, int requiredSkillPoints) {
     for (String statType : this.totalStats.keySet()) {
       PruneResult result;
       try {
@@ -240,13 +253,13 @@ public class Player {
           continue;
         }
         else {
-          result = this.pruneRecursive(best.score, best.statType, depth - 1, requiredSkillPoints + sp);
+          result = this.pruneRecursive(best, depth - 1, requiredSkillPoints + sp);
         }
         if (result.score > best.score) {
           best = new PruneResult(result.score, statType);
         }
         this.decreaseSkillLevel(statType);
-      } catch (NotEnoughSkillPointsException | LevelTooHighException e) {
+      } catch (SkillPointException e) {
         if (depth < this.DEPTH) {
           float score = this.getScore(requiredSkillPoints);
           result = new PruneResult(score, statType);
@@ -264,9 +277,10 @@ public class Player {
     // Termination condition
     float largestScore = Float.NEGATIVE_INFINITY;
     String bestStatType = "";
+    PruneResult initial = new PruneResult(largestScore, bestStatType);
     int depth = DEPTH;
     int requiredSkillPoints = 0;
-    PruneResult returnValue = this.pruneRecursive(largestScore, bestStatType, depth, requiredSkillPoints);
+    PruneResult returnValue = this.pruneRecursive(initial, depth, requiredSkillPoints);
     bestStatType = returnValue.statType;
     if (bestStatType.isEmpty()) {
       Map<String, Integer> upgradeCost = StatsMaps.subtractAll(this.skills.getUpgradeCost(), 1);
@@ -274,7 +288,7 @@ public class Player {
     }
     try {
       this.increaseSkillLevel(bestStatType);
-    } catch (NotEnoughSkillPointsException | LevelTooHighException e) {
+    } catch (SkillPointException e) {
       // should not happen?
       System.out.println(e.getMessage());
     }

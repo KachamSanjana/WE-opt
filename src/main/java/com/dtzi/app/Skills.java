@@ -2,14 +2,21 @@ package com.dtzi.app;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BinaryOperator;
+import java.util.logging.Level;
 
 public class Skills {
-  public class NotEnoughSkillPointsException extends Exception {
+  public class SkillPointException extends Exception{
+    SkillPointException(String message) {
+      super(message);
+    }
+  }
+  public class NotEnoughSkillPointsException extends SkillPointException {
     NotEnoughSkillPointsException(String message) {
       super(message);
     }
   }
-  public class LevelTooHighException extends Exception {
+  public class LevelTooHighException extends SkillPointException {
     LevelTooHighException(String message) {
       super(message);
     }
@@ -73,49 +80,46 @@ public class Skills {
     this.originalSkillPoints = sp;
   }
 
-  public void increaseLevel(String statType) throws NotEnoughSkillPointsException, LevelTooHighException {
-    if (this.upgradeCost.get(statType) > 10) {
-      throw new LevelTooHighException("Current level: " + this.upgradeCost.get(statType));
+  private void _Level(String statType, int direction) throws SkillPointException {
+    int upgradeCost = this.upgradeCost.get(statType);
+    if (upgradeCost > 10 && direction > 0) {
+      throw new LevelTooHighException("Current level: " + upgradeCost);
     }
-    this.skillPoints = this.skillPoints - this.upgradeCost.get(statType);
-    if (this.skillPoints < 0) {
-      this.skillPoints = this.skillPoints + this.upgradeCost.get(statType);
+
+    int spLeft = this.skillPoints - direction * upgradeCost + (direction==-1 ? -1 : 0);
+    if (spLeft < 0 && direction > 0) {
       throw new NotEnoughSkillPointsException("Available skill points: " + this.skillPoints + "\n" +
-          "Necessary skill points: " + this.upgradeCost.get(statType));
+          "Necessary skill points: " + upgradeCost);
     }
+    this.skillPoints = spLeft;
+
+    float newSkillValue = this.stats.get(statType) + direction * this.statIncrements.get(statType);
     switch (statType) {
       case "attackDamage", "health", "hunger", "criticalDamage", "companies", "production", "energy", "entre":
-        this.stats.put(statType,
-            this.stats.get(statType) + this.statIncrements.get(statType));
+        this.stats.put(statType, newSkillValue);
         break;
       case "armor":
         this.stats.put(statType,
-            (float) Math.min(0.9, this.stats.get(statType) + this.statIncrements.get(statType)));
+            (float) Math.min(0.9, newSkillValue));
         break;
       default:
         this.stats.put(statType,
-            (float) Math.min(1, this.stats.get(statType) + this.statIncrements.get(statType)));
+            (float) Math.min(1, newSkillValue));
     }
-    this.upgradeCost.put(statType, this.upgradeCost.get(statType) + 1);
+    this.upgradeCost.put(statType, upgradeCost + direction);
+  }
+
+  public void increaseLevel(String statType) throws SkillPointException {
+    _Level(statType, +1);
   }
 
   public void decreaseLevel(String statType) {
-    this.skillPoints = this.skillPoints + this.upgradeCost.get(statType) - 1;
-    switch (statType) {
-      case "attackDamage", "health", "hunger", "criticalDamage", "companies", "production", "energy", "entre":
-        this.stats.put(statType,
-            this.stats.get(statType) - this.statIncrements.get(statType));
-        break;
-      case "armor":
-        this.stats.put(statType,
-            (float) Math.min(0.9, this.stats.get(statType) - this.statIncrements.get(statType)));
-        break;
-      default:
-        this.stats.put(statType,
-            (float) Math.min(1,
-                this.stats.get(statType).floatValue() - this.statIncrements.get(statType).floatValue()));
+    try {
+      _Level(statType, -1);
+    } catch (SkillPointException e) {
+      // should in theory never be caught
+      System.out.println(e.getMessage());
     }
-    this.upgradeCost.put(statType, this.upgradeCost.get(statType) - 1);
   }
 
   public Map<String, Float> getStats() {
@@ -134,7 +138,7 @@ public class Skills {
     return this.skillPoints;
   }
 
-  public void resetSkillPoints() {
+  public void reset() {
     this.stats = new HashMap<String, Float>() {
       {
         put("attackDamage", 0f);

@@ -85,7 +85,7 @@ public class App {
     Instant start = Instant.now();
     Ammo[] ammos = { 
       new Ammo(0.1f, 0.17f), 
-      new Ammo(0.2f, 0.7f),
+      // new Ammo(0.2f, 0.7f),
     //  new Ammo(0.4f, 2.94f),
     };
     Weapon[] weapons = generateWeapons(ammos);
@@ -107,7 +107,8 @@ public class App {
     float bestScore = 0;
     String bestConfig = "";
     int totalTests = 0;
-    Gear gear = new Gear();
+    Skills skills = new Skills(116);
+    Player player = new Player(skills, buffs, food);
     for (Weapon weapon : weapons) {
       if (!isBlueWeapon(weapon))
         continue;
@@ -115,17 +116,17 @@ public class App {
       for (int h = minIndex; h <= maxIndex; h++) {
         for (int c = minIndex; c <= maxIndex; c++) {
           for (int g = minIndex; g <= maxIndex; g++) {
-            for (int p = minIndex; p <= maxIndex; p++) {
-              for (int b = minIndex; b <= maxIndex; b++) {
+            for (int b = minIndex; b <= maxIndex; b++) {
+              for (int p = minIndex; p <= maxIndex; p++) {
+                Gear gear = new Gear();
                 gear.setWeapon(weapon);
                 gear.setHelmet(helmets[h]);
                 gear.setChest(chests[c]);
                 gear.setGloves(gloves[g]);
-                gear.setPants(pants[p]);
                 gear.setBoots(boots[b]);
-                Skills skills = new Skills(116);
+                gear.setPants(pants[p]);
 
-                Player player = new Player(gear, skills, buffs, food);
+                player.setGear(gear);
                 Map<String, Integer> optimizedPoints = player.optimizeSkillPoints(); // assumed to return int or void?
                 float[] efficiency = player.getDamageEfficiency(); // [damagePer8h, costPer1k]
                 float score = player.getScore(player.getSkills().originalSkillPoints);
@@ -143,12 +144,19 @@ public class App {
 
                 totalTests++;
                 System.out.println(totalTests);
+                player.resetSkills();
               }
             }
           }
         }
       }
     }
+// Total combinations tested: 64
+// Best configuration:
+// Weapon: AD=87.0 CR=0.15 Ammo(Q=1.1,P=0.17) | H1 C2 G2 P2 B2 | Damage: 2
+// 69800.47 | Cost/1k: -0.04{dodge=10, lootChance=3, production=0, precisi
+// on=2, health=2, hunger=3, criticalRate=3, companies=4, armor=3, critica
+// lDamage=3, entre=0, attackDamage=5, energy=0}
     Instant end = Instant.now();
     long durationMs = Duration.between(start, end).toMillis();
     System.out.println("=== OPTIMIZATION RESULTS ===");
