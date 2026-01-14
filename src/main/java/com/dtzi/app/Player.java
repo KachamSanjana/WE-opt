@@ -55,12 +55,6 @@ public class Player {
     skills.reset();
   }
 
-  void setSkills(Skills skills) {
-    this.totalStats = StatsMaps.subtractMaps(this.totalStats, this.skills.getStats());
-    this.totalStats = StatsMaps.addMaps(this.totalStats, skills.getStats());
-    this.skills = skills;
-  }
-
   Gear getGear() {
     return this.gear;
   }
@@ -71,12 +65,35 @@ public class Player {
 
   private void increaseSkillLevel(String skill) throws SkillPointException {
     this.skills.increaseLevel(skill);
-    this.totalStats.put(skill, this.totalStats.get(skill) + this.skills.getStatIncrements().get(skill));
+    switch (skill) {
+      case "armor":
+        this.totalStats.put(skill, (float) Math.min(0.9, this.totalStats.get(skill) + this.skills.getStatIncrements().get(skill)));
+        break;
+      case "precision", "criticalRate":
+        this.totalStats.put(skill, (float) Math.min(1, this.totalStats.get(skill) + this.skills.getStatIncrements().get(skill)));
+        break;
+      default:
+        this.totalStats.put(skill, this.totalStats.get(skill) + this.skills.getStatIncrements().get(skill));
+        break;
+    }
   }
 
   private void decreaseSkillLevel(String skill) {
     this.skills.decreaseLevel(skill);
-    this.totalStats.put(skill, this.totalStats.get(skill) - this.skills.getStatIncrements().get(skill));
+    float stat = this.totalStats.get(skill);
+    int upgradeCost = this.skills.getUpgradeCost().get(skill);
+    float increment = this.skills.getStatIncrements().get(skill);
+    switch (skill) {
+      case "armor":
+        this.totalStats.put(skill, (float) Math.min(0.9, BASE_STATS.get(skill) + this.getGear().getStats().get(skill) + this.skills.getStats().get(skill)));
+        break;
+      case "precision", "criticalRate":
+        this.totalStats.put(skill, (float) Math.min(1, BASE_STATS.get(skill) + this.getGear().getStats().get(skill) + this.skills.getStats().get(skill)));
+        break;
+      default:
+        this.totalStats.put(skill, stat - increment);
+        break;
+    }
   }
 
 
@@ -248,7 +265,7 @@ public class Player {
         if (depth == 0) {
           result = new PruneResult(score, statType);
         } 
-        else if (best.score * 0.9f / depth > score) {
+        else if (best.score * 0.97f / depth > score) {
           this.decreaseSkillLevel(statType);
           continue;
         }

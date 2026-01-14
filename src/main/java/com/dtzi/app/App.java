@@ -28,13 +28,13 @@ public class App {
       Instant start = Instant.now();
       Ammo[] ammos = {
           new Ammo(0.1f, 0.17f),
-          // new Ammo(0.2f, 0.7f),
+          new Ammo(0.2f, 0.7f),
           // new Ammo(0.4f, 2.94f),
       };
       EquipmentData equipment = EquipmentGenerator.generateFromJson("equipment_prices_20260110.json", ammos);
       // Define gear quality range: indices 1 to 3 inclusive
-      int minArmorIndex = 1;
-      int maxArmorIndex = 2;
+      int minArmorIndex = 3;
+      int maxArmorIndex = 5;
 
       Helmet[] testHelmets = equipment.getHelmets(minArmorIndex, maxArmorIndex);
       Chest[] testChests = equipment.getChests(minArmorIndex, maxArmorIndex);
@@ -47,7 +47,7 @@ public class App {
       float bestScore = 0;
       String bestConfig = "";
       int totalTests = 0;
-      Skills skills = new Skills(88);
+      Skills skills = new Skills(29*4);
       Player player = new Player(skills, buffs, food);
       for (int w = 0; w < testWeapons.length; w++) {
         if (!isBlueWeapon(testWeapons[w]))
@@ -78,7 +78,7 @@ public class App {
                             "H%d C%d G%d P%d B%d | Damage: %.2f | Cost/1k: %.2f",
                         weapon.getAttackDamage(), weapon.getCriticalRate(),
                         weapon.getAmmo().getBonus(), weapon.getAmmo().getPrice(),
-                        h+minArmorIndex, c+minArmorIndex, g+minArmorIndex, p+minArmorIndex, b+minArmorIndex,
+                        h+minArmorIndex+1, c+minArmorIndex+1, g+minArmorIndex+1, p+minArmorIndex+1, b+minArmorIndex+1,
                         damage, efficiency[1]) + optimizedPoints.toString();
                   }
 
@@ -91,11 +91,14 @@ public class App {
           }
         }
       }
-      // Total combinations tested: 486
-      // Weapon: AD=87.0 CR=0.15 Ammo(Q=1.1,P=0.17) | H2 C2 G2 P2 B1 | Damage: 1
-      // 84073.75 | Cost/1k: -0.00{dodge=6, lootChance=2, production=0, precisio
-      // n=2, health=2, hunger=3, criticalRate=2, companies=6, armor=4, critical
-      // Damage=2, entre=0, attackDamage=5, energy=0}
+// LVL 22
+// === OPTIMIZATION RESULTS ===
+// Total combinations tested: 32
+// Best configuration:
+// Weapon: AD=87.0 CR=0.15 Ammo(Q=1.1,P=0.17) | H1 C2 G1 P2 B1 | Damage:
+//  186544.69 | Cost/1k: -0.01{dodge=6, lootChance=1, production=0, prec
+// ision=2, health=3, hunger=3, criticalRate=3, companies=5, armor=3, cr
+// iticalDamage=2, entre=0, attackDamage=6, energy=0}
       Instant end = Instant.now();
       long durationMs = Duration.between(start, end).toMillis();
       System.out.println("=== OPTIMIZATION RESULTS ===");
@@ -109,6 +112,6 @@ public class App {
   }
 
   public static boolean isBlueWeapon(Weapon w) {
-    return w.getAttackDamage() == 87f || w.getAttackDamage() == 59f;
+    return w.getAttackDamage() == 265f; // || w.getAttackDamage() == 59f;
   }
 }

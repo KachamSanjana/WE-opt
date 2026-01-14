@@ -2,8 +2,6 @@ package com.dtzi.app;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BinaryOperator;
-import java.util.logging.Level;
 
 public class Skills {
   public class SkillPointException extends Exception{
@@ -89,7 +87,7 @@ public class Skills {
     int spLeft = this.skillPoints - direction * upgradeCost + (direction==-1 ? -1 : 0);
     if (spLeft < 0 && direction > 0) {
       throw new NotEnoughSkillPointsException("Available skill points: " + this.skillPoints + "\n" +
-          "Necessary skill points: " + upgradeCost);
+          "Necessary skill points: " + upgradeCost + "for skill " + statType);
     }
     this.skillPoints = spLeft;
 
