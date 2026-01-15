@@ -154,13 +154,25 @@ public class EquipmentGenerator {
         data.boots = boots;
         
         // Generate Weapons
-        Weapon[] weapons = new Weapon[6];
+        Weapon[] weapons = new Weapon[18];
         weapons[0] = createWeapon(medianPrices, "knife", 37f, 0.05f, ammos[0]);
         weapons[1] = createWeapon(medianPrices, "gun", 59f, 0.1f, ammos[0]);
         weapons[2] = createWeapon(medianPrices, "rifle", 87f, 0.15f, ammos[0]);
         weapons[3] = createWeapon(medianPrices, "sniper", 117f, 0.20f, ammos[0]);
         weapons[4] = createWeapon(medianPrices, "tank", 155f, 0.29f, ammos[0]);
         weapons[5] = createWeapon(medianPrices, "jet", 265f, 0.39f, ammos[0]);
+        weapons[6] = createWeapon(medianPrices, "knife", 37f, 0.05f, ammos[1]);
+        weapons[7] = createWeapon(medianPrices, "gun", 59f, 0.1f, ammos[1]);
+        weapons[8] = createWeapon(medianPrices, "rifle", 87f, 0.15f, ammos[1]);
+        weapons[9] = createWeapon(medianPrices, "sniper", 117f, 0.20f, ammos[1]);
+        weapons[10] = createWeapon(medianPrices, "tank", 155f, 0.29f, ammos[1]);
+        weapons[11] = createWeapon(medianPrices, "jet", 265f, 0.39f, ammos[1]);
+        weapons[12] = createWeapon(medianPrices, "knife", 37f, 0.05f, ammos[2]);
+        weapons[13] = createWeapon(medianPrices, "gun", 59f, 0.1f, ammos[2]);
+        weapons[14] = createWeapon(medianPrices, "rifle", 87f, 0.15f, ammos[2]);
+        weapons[15] = createWeapon(medianPrices, "sniper", 117f, 0.20f, ammos[2]);
+        weapons[16] = createWeapon(medianPrices, "tank", 155f, 0.29f, ammos[2]);
+        weapons[17] = createWeapon(medianPrices, "jet", 265f, 0.39f, ammos[2]);
         data.weapons = weapons;
         
         return data;

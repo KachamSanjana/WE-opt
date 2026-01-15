@@ -12,7 +12,7 @@ public class Player {
   private Food food;
   private Map<String, Float> totalStats;
   private Buffs buffs;
-  private final int DEPTH = 4;
+  private final int DEPTH = 5;
   private static Map<String, Float> BASE_STATS = new HashMap<>() {
     {
       put("attackDamage", 100f);
@@ -139,8 +139,8 @@ public class Player {
     float costPerHit = this.costPerHit(statsMap, hitsOver8h);
     float totalCases = this.totalCases(statsMap, hitsOver8h);
     float ecoSkillIncome = this.ecoSkillIncome(statsMap);
-    float damageIncome = dmgOver8h / 1000 * 0.25f;
-    float missionIncome = 10 + 30 / 7;
+    float damageIncome = dmgOver8h * 0.001f * 0.25f;
+    float missionIncome = 10 + 4.285f;
 
     float hitsPer1k = 1000 / hitDamage;
     float caseReturnPer1k = totalCases / hitsOver8h * hitsPer1k * CASE_PRICE;
@@ -165,8 +165,8 @@ public class Player {
     float energy = statsMap.get("energy");
     float entre = statsMap.get("entre");
     float companyIncome = this.companyIncome(statsMap);
-    float entreIncome = prod * entre / 10 * 24 * PP_VALUE;
-    float energyIncome = prod * energy / 10 * 24 * PP_VALUE * 0.95f; // tax deducted
+    float entreIncome = prod * entre * 0.1f * 24 * PP_VALUE;
+    float energyIncome = prod * energy * 0.1f * 24 * PP_VALUE * 0.9f; // tax deducted
     income = companyIncome + entreIncome + energyIncome;
     return income;
 
@@ -174,7 +174,7 @@ public class Player {
 
   public float companyIncome(Map<String, Float> statsMap) {
     float income;
-    float AVERAGE_COMPANY_LVL = 7f;
+    float AVERAGE_COMPANY_LVL = 5.3333f;
     float PP_VALUE = 0.087f;
     float companies = statsMap.get("companies");
     float incomePerCompany = PP_VALUE * AVERAGE_COMPANY_LVL;
@@ -206,8 +206,8 @@ public class Player {
     float hunger = statsMap.get("hunger");
     float dodge = statsMap.get("dodge");
     float armor = statsMap.get("armor");
-    float hpRegen = (float) hp / 10;
-    float hungerRegen = (float) hunger / 10;
+    float hpRegen = (float) hp * 0.1f;
+    float hungerRegen = (float) hunger * 0.1f;
     float hpRestore = this.food.getHpRestore();
     float hpOver8h = (hp + hpRegen * HOURS + hpRestore * hungerRegen * HOURS + hpRestore * hunger)
         / (1 - dodge)
@@ -265,7 +265,7 @@ public class Player {
         if (depth == 0) {
           result = new PruneResult(score, statType);
         } 
-        else if (best.score * 0.97f / depth > score) {
+        else if (best.score * 0.9f / depth > score) {
           this.decreaseSkillLevel(statType);
           continue;
         }

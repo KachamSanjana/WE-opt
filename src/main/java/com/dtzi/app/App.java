@@ -8,6 +8,8 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.print.attribute.standard.PrinterLocation;
+
 import com.dtzi.app.Buffs.*;
 import com.dtzi.app.EquipmentGenerator.EquipmentData;;
 
@@ -22,32 +24,32 @@ public class App {
       PoliticalBonuses polBonus = new PoliticalBonuses(false, true);
       RegionalBonuses regBonus = new RegionalBonuses(0f, false);
       Pill pill = new Pill(true);
-      Buffs buffs = new Buffs(pill, 0.12f, countryBonus, muBonus, regBonus, polBonus);
+      Buffs buffs = new Buffs(pill, 0.13f, countryBonus, muBonus, regBonus, polBonus);
       Food food = new Food(3, 7f);
 
       Instant start = Instant.now();
       Ammo[] ammos = {
           new Ammo(0.1f, 0.17f),
           new Ammo(0.2f, 0.7f),
-          // new Ammo(0.4f, 2.94f),
+          new Ammo(0.4f, 2.94f),
       };
       EquipmentData equipment = EquipmentGenerator.generateFromJson("equipment_prices_20260110.json", ammos);
       // Define gear quality range: indices 1 to 3 inclusive
-      int minArmorIndex = 3;
-      int maxArmorIndex = 5;
+      int minArmorIndex = 1;
+      int maxArmorIndex = 1;
 
       Helmet[] testHelmets = equipment.getHelmets(minArmorIndex, maxArmorIndex);
       Chest[] testChests = equipment.getChests(minArmorIndex, maxArmorIndex);
       Gloves[] testGloves = equipment.getGloves(minArmorIndex, maxArmorIndex);
       Pants[] testPants = equipment.getPants(minArmorIndex, maxArmorIndex);
       Boots[] testBoots = equipment.getBoots(minArmorIndex, maxArmorIndex);
-      Weapon[] testWeapons = equipment.getWeapons(minArmorIndex, maxArmorIndex);
+      Weapon[] testWeapons = equipment.getWeapons(0, 6);
 
       // Track best result
       float bestScore = 0;
       String bestConfig = "";
       int totalTests = 0;
-      Skills skills = new Skills(29*4);
+      Skills skills = new Skills(20*4);
       Player player = new Player(skills, buffs, food);
       for (int w = 0; w < testWeapons.length; w++) {
         if (!isBlueWeapon(testWeapons[w]))
@@ -70,6 +72,7 @@ public class App {
                   float[] efficiency = player.getDamageEfficiency(); // [damagePer8h, costPer1k]
                   float score = player.getScore(player.getSkills().originalSkillPoints);
                   float damage = efficiency[0];
+                  System.out.println(score);
                   if (score > bestScore) {
                     bestScore = score;
                     Weapon weapon = testWeapons[w];
@@ -91,6 +94,13 @@ public class App {
           }
         }
       }
+// LVL 21
+// === OPTIMIZATION RESULTS ===
+// Total combinations tested: 32
+// Best configuration:
+// Weapon: AD=87.0 CR=0.15 Ammo(Q=1.1,P=0.17) | H2 C3 G2 P2 B2 | Damage: 157836.63 | Cost/1k: -0.01{dodge=
+// 5, lootChance=1, production=1, precision=2, health=2, hunger=3, criticalRate=3, companies=6, armor=4, c
+// riticalDamage=2, entre=0, attackDamage=5, energy=0}
 // LVL 22
 // === OPTIMIZATION RESULTS ===
 // Total combinations tested: 32
@@ -112,6 +122,6 @@ public class App {
   }
 
   public static boolean isBlueWeapon(Weapon w) {
-    return w.getAttackDamage() == 265f; // || w.getAttackDamage() == 59f;
+    return w.getAttackDamage() == 87f;
   }
 }
